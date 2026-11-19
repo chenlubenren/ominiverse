@@ -6,8 +6,8 @@
  const Control=typeof require==='function'?require('./robot-control-protocol.js'):window.RobotControlProtocol;
  const TYPES=new Set(['robot-rebellion','robot-design','robot-library','extinguish','robots','megastructures','fire','earthquake','explosion','infection','ventilation','zombie-virus','zombies','doors','reset','pause','resume']);
  // Apply this guard before both local parsing and optional model inference.
- function isNonCommand(text){const s=String(text||'').replace(/(?:不要|别)(攻击|进攻|开火)/g,'停止$1');return /不要|不许|别生成|别释放|不想|不需要|没有|未发生|避免|防止|如果|假如|假设|是否|能否|可否|会不会|怎么样|会怎样|是什么|介绍|怎么办|如何|怎么|为什么|吗|[?？]/.test(s);}
- function validExplicitNumbers(text){for(const match of String(text).matchAll(/([+-]?\d+(?:\.\d+)?)\s*(?:个|只|台|名|头|架|条|具|层|楼|[fF])/g))if(!Number.isInteger(Number(match[1]))||Number(match[1])<1)throw Error('数量和楼层必须是正整数，不能使用负数、小数或零。');}
+ function isNonCommand(text){const s=String(text||'').replace(/(?:不要|别)(攻击|进攻|开火)/g,'停止$1');return /不要|不许|请勿|禁止|别让|别生成|别释放|不想|不需要|没有|未发生|尚未|从未|未曾|未被|未遭|未受|并未|不会|不攻击|不进攻|避免|防止|如果|假如|假设|是否|能否|可否|会不会|怎么样|会怎样|是什么|介绍|怎么办|如何|怎么|为什么|吗|[?？]/.test(s);}
+ function validExplicitNumbers(text){for(const match of String(text).matchAll(/([+-]?\d+(?:\.\d+)?)\s*(?:个|只|台|名|头|架|条|具|层|楼|[fF])/g))if(!Number.isInteger(Number(match[1]))||Number(match[1])<1)throw Error('数量和楼层必须是正整数，不能使用负数、小数或零。');for(const match of String(text).matchAll(/(?:第\s*)?([\d零一二两三四五六七八九十百]+)\s*(?:层|楼|[fF])/g))if(number(match[1])>30)throw Error('楼层范围为 1–30 层。');}
  function weaponModifier(text){const match=String(text).trim().match(/^(?:(?:请)?(?:用|使用|改用|配备|装备|采用|发射))?(激光|镭射|子弹|射击|机枪|近战|拳击|拳头|冲撞)(?:(?:去|来)?(?:攻击|进攻|射击)(?:场景中的)?(?:人类|人员|员工|目标)?)?[。！!\s]*$/);return match?(/激光|镭射/.test(match[1])?'laser':/近战|拳|冲撞/.test(match[1])?'melee':'bullet'):null;}
  const number=s=>{s=String(s).replace(/两/g,'二');if(/^\d+$/.test(s))return Number(s);const digits='零一二三四五六七八九';let n=0,v=0;for(const c of s){if(digits.includes(c))v=digits.indexOf(c);else if(c==='十'){n+=(v||1)*10;v=0;}else if(c==='百'){n+=(v||1)*100;v=0;}}return n+v;};
  function unavailableCreature(text){

@@ -74,7 +74,7 @@
       const card=document.createElement('aside');card.id='building-floor-sidebar';card.className='building-focus-card';card.setAttribute('aria-label','楼层观察');card.innerHTML=`<span class="building-kicker" id="focus-kicker">BUILDING / LIVE</span><h2 id="focus-title">整栋建筑</h2><p id="focus-description">首次点击抽出楼层，再次点击进入室内。</p><div class="focus-metrics"><span><b id="focus-people">—</b><small id="focus-people-label">楼内人数</small></span><span><b id="focus-working">—</b><small>正在办公</small></span><span><b id="focus-area">30</b><small id="focus-area-label">楼层</small></span></div><div class="focus-actions"><button id="focus-back">← 整栋建筑</button><button id="focus-interior">进入室内模式 ↗</button></div>`;
       document.body.appendChild(card);card.appendChild($('interior-building-bar'));this.card=card;$('focus-back').onclick=()=>building.closeDrawer();$('focus-interior').onclick=()=>building.enterFloor(building.selected);
       if(L.WhiteAvatar){const setting=document.createElement('label');setting.className='focus-avatar-color';setting.innerHTML='人物颜色 <input id="focus-avatar-color" type="color" aria-label="设置人物颜色">';card.appendChild(setting);$('focus-avatar-color').value=L.WhiteAvatar.base;$('focus-avatar-color').oninput=e=>L.WhiteAvatar.setColor(e.target.value);}
-      this.bindInteriorExit();this.syncCard();
+      this.bindInteriorExit();this.bindInteriorZoom();this.syncCard();
       this.installExteriorShadowFilter();
     }
     get engaged(){return this.entries.size>0;}
@@ -124,23 +124,29 @@
       if(this.lightingWarmed||!final&&this.staticLightingWarmed)return;
       const b=this.b,v=b.view,renderer=v.renderer,target=renderer.getRenderTarget(),autoClear=renderer.autoClear,shadowUpdate=renderer.shadowMap.needsUpdate;
       this.lighting??=new FloorPracticalLighting(v);
-      // Start the existing architecture's eight-light variants while office
-      // models download. Once their real batches exist, repeat the full scene
-      // pass: the renderer reuses those programs and adds skin/hair variants.
-      // Only that final pass can release the boot screen.
+      // Prepare the visible tower's eight-light variants while models download.
+      // The canonical per-floor meshes stay hidden behind their shared batches;
+      // Three r128's default compile traversal otherwise includes all of them.
+      // The final pass adds the real skin/hair variants before releasing boot.
       // Match the linear offscreen target used by the building composer.
       const visible=this.lighting.group.visible,room=v.model?.group,roomVisible=room?.visible,roomCulling=[],start=performance.now(),programsBefore=renderer.info?.programs?.length;
       try{
         this.lighting.group.visible=true;if(room){room.visible=true;room.traverse(node=>{if(node.isMesh){roomCulling.push([node,node.frustumCulled]);node.frustumCulled=false;}});}
         renderer.setRenderTarget(b.composer.renderTarget1);
-        const compileStart=performance.now();renderer.compile(v.scene,v.camera);const compileMs=performance.now()-compileStart;
+        const traverse=v.scene.traverse,compileStart=performance.now(),shadowCasters=[];let compiledObjects=0;
+        try{v.scene.traverse=callback=>v.scene.traverseVisible(node=>{if(node.material)compiledObjects++;if(node.castShadow&&node.geometry)shadowCasters.push(node.uuid+':'+node.geometry.uuid+':'+(node.count??1));callback(node);});renderer.compile(v.scene,v.camera);}finally{v.scene.traverse=traverse;}
+        const compileMs=performance.now()-compileStart;
         // Exercise the compiled programs and allocate shadow maps before the
         // loading screen leaves; compile alone does not upload these resources.
-        renderer.autoClear=true;renderer.shadowMap.needsUpdate=true;
-        for(const {light}of this.lighting.lamps)light.shadow.needsUpdate=true;
+        // The final character batches do not cast shadows. Reuse the maps
+        // allocated by the architecture pass; entering/moving a real floor
+        // still invalidates them through the normal shadow scheduler.
+        const shadowKey=shadowCasters.join('|')+':'+(v.model?.aoVersion||0)+':'+(b.matrixEpoch||0),shadowWarmup=!this.staticLightingWarmed||this.warmupShadowKey!==shadowKey;
+        renderer.autoClear=true;renderer.shadowMap.needsUpdate=shadowWarmup;
+        if(shadowWarmup)for(const {light}of this.lighting.lamps)light.shadow.needsUpdate=true;
         const renderStart=performance.now();renderer.render(v.scene,v.camera);const renderMs=performance.now()-renderStart;
-        (this.lightingWarmupStats??=[]).push({phase:final?'complete':'architecture',startMs:start,compileMs,renderMs,totalMs:performance.now()-start,programsBefore,programsAfter:renderer.info?.programs?.length});
-        this.staticLightingWarmed=true;if(final)this.lightingWarmed=true;
+        (this.lightingWarmupStats??=[]).push({phase:final?'complete':'architecture',startMs:start,compileMs,renderMs,totalMs:performance.now()-start,compiledObjects,shadowWarmup,programsBefore,programsAfter:renderer.info?.programs?.length});
+        this.staticLightingWarmed=true;this.warmupShadowKey=shadowKey;if(final)this.lightingWarmed=true;
       }finally{this.lighting.group.visible=visible;if(room)room.visible=roomVisible;for(const [node,culled]of roomCulling)node.frustumCulled=culled;renderer.autoClear=autoClear;renderer.shadowMap.needsUpdate=shadowUpdate;renderer.setRenderTarget(target);}
     }
     warmInteriorObjects(root){
@@ -166,6 +172,36 @@
       }finally{r.autoClear=autoClear;r.shadowMap.needsUpdate=shadowUpdate;r.setRenderTarget(target);for(const mesh of samples)mesh.dispose?.();}
     }
     reducedMotion(){return L.collaboration?.reducedSceneMotion()??matchMedia('(prefers-reduced-motion: reduce)').matches;}
+    canZoomInterior(){
+      const b=this.b,v=b.view,c=L.collaboration;
+      return this.interior&&b.phase==='interior'&&v.controls.enabled&&v.controls.enableZoom!==false&&!['walk','human'].includes(v.view)&&!b.continuous?.active&&(!c||c.environment==='office'&&!c.switching);
+    }
+    beginInteriorZoom(){
+      if(this.zoomLimit!==undefined||!this.canZoomInterior())return;
+      const v=this.b.view;this.zoomLimit=v.controls.maxDistance;
+      v.controls.maxDistance=Math.min(this.zoomLimit,this.interiorZoomMax??v.camera.position.distanceTo(v.controls.target));
+    }
+    endInteriorZoom(){
+      if(this.zoomLimit===undefined)return;
+      this.b.view.controls.maxDistance=this.zoomLimit;this.zoomLimit=undefined;
+    }
+    resetInteriorZoomBaseline(position=this.b.view.camera.position,target=this.b.view.controls.target){
+      this.endInteriorZoom();
+      this.interiorZoomMax=this.interior?position.distanceTo(target):undefined;
+    }
+    bindInteriorZoom(){
+      const v=this.b.view,canvas=v.renderer.domElement;if(!canvas)return;
+      // Each framing pose supplies one fixed outer limit. Zooming closer must
+      // not tighten it: every gesture can return to the original room framing.
+      // Apply it only to input so camera presets and transitions remain free.
+      canvas.addEventListener('wheel',event=>{
+        if(event.deltaY!==0)this.beginInteriorZoom();
+      },{capture:true,passive:true});
+      canvas.addEventListener('pointerdown',event=>{if(event.button===1)this.beginInteriorZoom();},true);
+      v.controls.addEventListener('end',()=>this.endInteriorZoom());
+      (canvas.ownerDocument||document).addEventListener('pointercancel',()=>this.endInteriorZoom(),true);
+      (canvas.ownerDocument||document).addEventListener('pointerup',event=>{if(event.button===1)this.endInteriorZoom();},true);
+    }
     canExitInterior(){
       const b=this.b,v=b.view,c=L.collaboration;
       return this.interior&&b.phase==='interior'&&!b.loading&&!b.app.busy&&!b.matrixLab?.busy&&v.controls.enabled&&
@@ -220,7 +256,7 @@
       if(this.active&&b.selected===floor&&this.entries.has(floor))return;
       b.cameraTween=null;
       if(!this.engaged){
-        this.overview={position:b.view.camera.position.clone(),target:b.view.controls.target.clone(),min:b.view.controls.minDistance,max:b.view.controls.maxDistance};
+        this.overview={position:b.view.camera.position.clone(),target:b.view.controls.target.clone(),up:b.view.camera.up.clone(),fov:b.view.camera.fov,min:b.view.controls.minDistance,max:b.view.controls.maxDistance};
         this.prepareContext();
       }
       this.active=true;b.selected=floor;
@@ -233,7 +269,7 @@
       const b=this.b,v=b.view,p=b.plates[b.selected-1].group;
       if(this.interior){
         const pose=L.interiorOverviewPose(v.model.bounds||v.bounds,v.camera.aspect,40);
-        v.view='perspective';v.controls.enableRotate=true;this.moveCamera(pose.position,pose.target,animate,{up:new T.Vector3(0,1,0),fov:40});return;
+        v.view='perspective';v.controls.enableRotate=true;this.moveCamera(pose.position,pose.target,animate,{up:new T.Vector3(0,1,0),fov:40,duration:420});return;
       }
       b.world.updateMatrixWorld(true);const center=p.getWorldPosition(new T.Vector3()).add(new T.Vector3(0,1.6,0));
       if(this.interior)center.sub(this.origin);
@@ -246,11 +282,12 @@
       const to=v.controls.target.clone().add(end.clone().sub(v.camera.position));
       this.moveCamera(end,to,animate);
     }
-    moveCamera(end,to,animate=true,{up,fov}={}){
+    moveCamera(end,to,animate=true,{up,fov,duration=650}={}){
       const b=this.b,v=b.view;
+      this.resetInteriorZoomBaseline(end,to);
       // Flush OrbitControls' residual damping before starting a deterministic camera path.
       const damping=v.controls.enableDamping;v.controls.enableDamping=false;v.controls.update();v.controls.enableDamping=damping;
-      if(animate&&!this.reducedMotion())b.cameraTween={start:null,duration:650,position:v.camera.position.clone(),target:v.controls.target.clone(),end,to,up:v.camera.up.clone(),endUp:up||v.camera.up.clone(),fov:v.camera.fov,endFov:fov??v.camera.fov};
+      if(animate&&!this.reducedMotion())b.cameraTween={start:null,duration,position:v.camera.position.clone(),target:v.controls.target.clone(),end,to,up:v.camera.up.clone(),endUp:up||v.camera.up.clone(),fov:v.camera.fov,endFov:fov??v.camera.fov};
       else{b.cameraTween=null;v.camera.position.copy(end);v.controls.target.copy(to);if(up)v.camera.up.copy(up);if(fov!==undefined&&v.camera.fov!==fov){v.camera.fov=fov;v.camera.updateProjectionMatrix();}v.controls.update();}
     }
     startBlend(duration=850){this.presentationAt=performance.now();this.blend={start:this.presentationTime,duration,strength:this.strength,weights:new Map([...this.entries].map(([f,e])=>[f,e.weight]))};}
@@ -285,6 +322,7 @@
     syncRoot(){for(const node of this.localNodes())if(node.parent!==this.root)this.root.add(node);}
     unmountInterior(){
       if(!this.interior)return;const v=this.b.view;
+      this.endInteriorZoom();this.interiorZoomMax=undefined;
       if(v.view==='human'){const direction=v.camera.getWorldDirection(new T.Vector3());v.controls.target.copy(v.camera.position).addScaledVector(direction,20);v.view='perspective';}
       this.interior=false;v.floorOrigin=null;
       v.camera.lookAt=this.originalLookAt;v.camera.position.add(this.origin);v.controls.target.add(this.origin);
@@ -300,10 +338,11 @@
       b.world.visible=true;b.drawerGuide.visible=false;b.selection.visible=false;this.syncCard();v.shadowDirty=true;
     }
     returnToOverview(animate=true){
-      const b=this.b,v=b.view;this.unmountInterior();b.phase='overview';document.body.dataset.buildingPhase='overview';b.ui.hidden=false;$('interior-building-bar').hidden=true;
+      const b=this.b,v=b.view,home=this.overview;this.unmountInterior();b.phase='overview';document.body.dataset.buildingPhase='overview';b.ui.hidden=false;$('interior-building-bar').hidden=true;
       b.journey?.cancel();if(!['perspective','detail','top'].includes(v.view))v.view='perspective';v.controls.enabled=true;v.camera.near=.5;v.camera.updateProjectionMatrix();
       for(const node of this.localNodes())node.visible=false;v.agentBubbles?.group&&(v.agentBubbles.group.visible=false);
       document.body.classList.remove('office-society-mode');b.app.play(false);b.society.running=true;b.world.visible=true;this.close({immediate:!animate});
+      if(home){v.controls.enableRotate=true;this.moveCamera(home.position.clone(),home.target.clone(),animate,{up:home.up?.clone()||new T.Vector3(0,1,0),fov:home.fov??40,duration:420});}
     }
     leaveForWalk(){
       const b=this.b;this.unmountInterior();this.close({immediate:true,restoreCamera:false});b.world.visible=false;
@@ -317,7 +356,7 @@
       this.captureContext();
     }
     captureContext(){
-      this.b.world.traverse(node=>{
+      for(const root of [this.b.world,L.megastructureFleet?.group].filter(Boolean))root.traverse(node=>{
         if(!node.material||this.contextSeen.has(node)||node.userData.floorFocusOverlay||node===this.b.selection||node===this.b.drawerGuide)return;
         for(let parent=node;parent;parent=parent.parent)if(this.canonicalFloors.has(parent))return;
         this.contextSeen.add(node);
@@ -359,7 +398,10 @@
       const u=reduced?1:Math.min(1,(this.presentationTime-this.blend.start)/this.blend.duration),ease=u*u*u*(u*(u*6-15)+10);
       this.strength=this.blend.strength+((this.active?1:0)-this.blend.strength)*ease;
       this.lighting?.update(this.strength);
-      const context=1-.78*this.strength;
+      const context=1-this.strength;
+      // The live floor and its lights have their own scene roots. Hide the
+      // fully faded exterior to remove its draw calls, then reveal it on exit.
+      this.b.world.visible=!this.interior||context>0;
       for(const {source,material}of this.contextMaterials.values())this.opacity(material,source,context);
       for(const record of this.contextNodes){record.node.castShadow=false;record.node.renderOrder=this.strength>.001?2:record.renderOrder;}
       for(const [floor,entry]of this.entries){
@@ -375,6 +417,7 @@
     }
     disposeEntry(entry){for(const {mesh,material}of entry.parts.values()){this.b.tower.remove(mesh);this.b.pickable=this.b.pickable.filter(o=>o!==mesh);mesh.dispose?.();material.dispose();}}
     release(){
+      this.endInteriorZoom();this.interiorZoomMax=undefined;
       this.lighting?.stop();
       for(const entry of this.entries.values())this.disposeEntry(entry);this.entries.clear();
       for(const {node,original,castShadow,renderOrder}of this.contextNodes||[]){node.material=original;node.castShadow=castShadow;node.renderOrder=renderOrder;}
@@ -391,7 +434,7 @@
       $('focus-area').textContent=focused?spec.area:30;$('focus-area-label').textContent=focused?'面积 / ㎡':'楼层';
       this.card.querySelector('.focus-actions').hidden=indoor||!focused;
       $('interior-building-bar').hidden=!indoor;
-      if(this.active){$('building-title').textContent=`聚焦 ${String(b.selected).padStart(2,'0')}F`;$('building-subtitle').textContent='拖动环视 · 滚轮缩放 · 返回整栋建筑';$('building-step').textContent=String(b.selected).padStart(2,'0');}
+      if(this.active){$('building-title').textContent=`聚焦 ${String(b.selected).padStart(2,'0')}F`;$('building-subtitle').textContent=indoor?'拖动环视 · 滚轮缩放 · 点击楼层外退出':'拖动环视 · 滚轮缩放 · 返回整栋建筑';$('building-step').textContent=String(b.selected).padStart(2,'0');}
     }
   }
   L.BuildingFloorFocus=BuildingFloorFocus;

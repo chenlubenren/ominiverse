@@ -5,7 +5,34 @@
   const ignored=/不要|不能|别生成|不想|不需要|没有|不会|未发生|避免|防止|如果|假如|假设|是否|能否|怎么办|如何|怎么|为什么|介绍|是什么|吗|[?？]/;
   const subjects=/火灾|起火|着火|灭火|地震|爆炸|坍塌|崩塌|感染|传染|通风|污染|丧尸|僵尸|怪物|复仇女神|巨构|巨型|飞龙|章鱼|八爪|猎蛛|猎蜘|巨蛇|泰坦|机器人|机器狗|钢铁军团|\bG1\b|\bGo2\b|\bSpot\b|门|这栋楼|大楼/i;
   const verbs=/调用|打造|定制|设计|叛变|叛乱|平息|解除|生成|制作|制造|创建|派|部署|出现|释放|召唤|发生|触发|启动|模拟|点燃|引爆|攻击|进攻|巡逻|爬|停火|停止|清除|移除|收回|暂停|继续|恢复|关闭|打开|开启|封锁|灭火|扑灭|复原|还原|重置/;
-  const examples=['12层发生火灾，然后关闭所有房间的门','灭火','15层生成3台机器狗，用激光攻击人类','打造3个蓝色机器狗在11层乱走','11层机器人叛变','解除全楼机器人叛变','生成2个飞龙机器人','攻击这栋楼','停止攻击这栋楼','20层发生爆炸','地震，强度最大','通风污染','逐层传播演示','复原'];
+  const examples=['大楼受到攻击','机器人攻击大楼','来点好玩的','12层发生火灾，然后关闭所有房间的门','灭火','15层生成3台机器狗，用激光攻击人类','打造3个蓝色机器狗在11层乱走','11层机器人叛变','解除全楼机器人叛变','生成2个飞龙机器人','停止攻击这栋楼','20层发生爆炸','地震，强度最大','通风污染','逐层传播演示','复原'];
+  const officeControl=text=>{
+    const s=String(text).trim().replace(/[\s，,。！!]/g,'').replace(/^(请|帮我)/,'');
+    if(/^(停火|停止攻击|停止进攻|别攻击|不要攻击)$/.test(s))return '停止攻击大楼';
+    if(/^(停止|停下|结束|取消|清除事件|结束事件|停止事件|返回日常|回到日常)$/.test(s))return '复原';
+    if(/^(先停一下|暂停一下|暂停事件|暂停动画)$/.test(s))return '暂停';
+    if(/^(继续吧|继续事件|继续动画|恢复动画)$/.test(s))return '继续';
+    return text;
+  };
+  // Free descriptions get a named, bounded existing animation, without inventing
+  // assets or silently turning a stop, denied action or invalid number into a spawn.
+  C.officeEventFallback=function(text,{floor=1,robots=[]}={}){
+    const raw=String(text||'').trim(),P=window.DisasterCommands;
+    if(!raw||officeControl(raw)!==raw||(P?P.isNonCommand(raw):ignored.test(raw))||/^(?:请|帮我)?(?:停火|停止|停下|暂停|结束|取消|关闭|清除|移除|删除|收回|复原|还原|重置|恢复|继续|别|不要)/.test(raw))return null;
+    P?.validExplicitNumbers(raw);
+    const explicitFloor=raw.match(/(?:第\s*)?([\d零一二两三四五六七八九十百]+)\s*(?:层|楼|[fF])/);
+    if(explicitFloor)floor=P.number(explicitFloor[1]);
+    if(!Number.isInteger(floor)||floor<1||floor>30)throw Error('办公楼支持 1 至 30 层，请指定有效楼层。');
+    const countMatch=raw.match(/([\d零一二两三四五六七八九十百]+)\s*(?:个|只|台|头|架|条|具)/),count=countMatch?P.number(countMatch[1]):1;
+    if(count<1||count>12)throw Error('巡游演示一次支持 1–12 台，请减少数量后重试。');
+    if(window.MegastructureProtocol?.isBuildingAttack(raw))return{text:'大楼受到攻击',title:'巨头飞龙袭击建筑'};
+    if(/火情|浓烟|冒烟|烧起来|燃起来/.test(raw))return{text:floor+'层发生火灾',title:floor+'F 火情与疏散'};
+    if(/摇晃|震动|震颤|晃起来|晃动/.test(raw))return{text:floor+'层轻微地震',title:'建筑摇晃与就地避险'};
+    if(robots.length)return{text:'继续巨构机器人',title:'巨构机器人现场',existing:true};
+    const choices=[['飞龙','飞龙空中巡游'],['泰坦','泰坦地面巡游'],['猎蛛','机械猎蛛巡游']];let hash=2166136261;
+    for(const ch of raw){hash^=ch.codePointAt(0);hash=Math.imul(hash,16777619)>>>0;}
+    const [type,title]=choices[hash%choices.length];return{text:'生成'+count+'个'+type+'机器人',title};
+  };
   class EventIntegration {
     constructor(owner){
       this.owner=owner;this.lastUI=-Infinity;this.lastEnvironment=owner.environment;this.allowRemote=false;this.busy=false;
@@ -25,7 +52,7 @@
       dialog.querySelector('.co-close').onclick=()=>dialog.close();
       this.renderExamples();
       $('co-event-cloud').onchange=e=>{this.allowRemote=e.target.checked;};
-      $('co-event-library').onclick=()=>{dialog.close();L.robotLibrary?.open();};
+      $('co-event-library').onclick=()=>{dialog.close();this.owner.openRobotLibrary();};
       $('co-event-army').onclick=()=>{dialog.close();L.robotSystems?.open?.();};
       $('co-event-observe').onclick=async()=>{dialog.close();await L.firstPersonMode?.start('observe');};
       $('co-event-reset').onclick=async()=>{dialog.close();if(this.owner.environment==='station')await this.owner.chat.commands.execute(this.owner.stationExperience?.scenarios?.blocksObservation?'停止剧情':'清除事件');else await this.run('复原');};
@@ -62,6 +89,7 @@
       $('collaboration-panel')?.close();this.owner.chat.close(false);if(document.pointerLockElement)document.exitPointerLock();this.dialog.showModal();this.refresh();
     }
     recognizes(text,command){
+      if(this.owner.environment==='office'&&officeControl(text)!==text)return true;
       if(window.DisasterCommands?window.DisasterCommands.isNonCommand(text):ignored.test(text))return false;
       if(/^逐层传播演示$/.test(text.trim()))return true;
       if(command.action!=='station-scenario'){if(/叛变|叛乱|造反|反叛|暴走/.test(text)&&/机器人|机器狗|机械人/.test(text))return true;try{if(L.robotLibrary?.plan(text,{floor:this.owner.b?.selected,interior:this.owner.b?.phase==='interior'}))return true;}catch{return true;}}
@@ -71,7 +99,7 @@
       if(command.action==='robot'&&!/攻击|进攻|子弹|激光|近战|大军|军队|打造|定制|待命|乱走|巡游|[2-9二三四五六七八九十百]\s*(台|个|只)/.test(text))return false;
       if(/^(?:第?\s*[0-9零一二两三四五六七八九十百]+\s*[楼层fF]\s*)?(呼吸道感染|呼吸感染|通风污染|空气污染|通风感染)$/.test(text.trim()))return true;
       if(/^(?:第?\s*[0-9零一二两三四五六七八九十百]+\s*[楼层fF]\s*)?(最大|最强|最高|强烈|轻微|严重)(强度)?(地震|爆炸|火灾)$/.test(text.trim()))return true;
-      return /^(复原|还原|重置|暂停|暂停模拟|继续|继续模拟|恢复模拟|恢复初始状态|呼吸感染|通风污染|通风感染|灭火)$/.test(text.trim())||/^(?:第?\s*[0-9零一二两三四五六七八九十百]+\s*[楼层fF]\s*)?(地震|爆炸|火灾|通风污染|呼吸感染)[，,\s]*(强度)?[为是：:\s]*(最大|最强|最高|强烈|轻微|严重)$/.test(text.trim())||subjects.test(text)&&verbs.test(text);
+      return /^(复原|还原|重置|暂停|暂停模拟|继续|继续模拟|恢复模拟|恢复初始状态|呼吸感染|通风污染|通风感染|灭火)$/.test(text.trim())||/^(?:第?\s*[0-9零一二两三四五六七八九十百]+\s*[楼层fF]\s*)?(地震|爆炸|火灾|通风污染|呼吸感染)[，,\s]*(强度)?[为是：:\s]*(最大|最强|最高|强烈|轻微|严重)$/.test(text.trim())||subjects.test(text)&&verbs.test(text)||this.owner.environment==='office'&&['note','unsupported'].includes(command.action);
     }
     async tryHandle(text,location,command){
       if(!this.recognizes(text,command))return false;
@@ -87,8 +115,16 @@
       if(floorMatch&&location?.floor&&window.DisasterCommands.number(floorMatch[1])!==location.floor){chat.add('文字楼层与位置标记不一致，请保留同一个目标楼层。','未执行');return;}
       this.busy=true;const environment=o.environment;
       try{
-        const result=await L.disasterDirector.executeText(text,{environment,floor:location?.floor||o.b.selected,position:location?{x:location.x,z:location.z}:undefined,allowRemote:this.allowRemote});
+        const options={environment,floor:location?.floor||o.b.selected,position:location?{x:location.x,z:location.z}:undefined,allowRemote:this.allowRemote};
+        let result=await L.disasterDirector.executeText(environment==='office'?officeControl(text):text,options),mapped;
+        if(environment==='office'&&!result?.actions?.length&&o.environment===environment){
+          mapped=C.officeEventFallback(text,{floor:options.floor,robots:L.megastructureFleet?.robots||[]});
+          // The named animation refers to a built-in rig, not a fuzzy library
+          // search that could substitute an unrelated small robot.
+          if(mapped)result=await L.disasterDirector.executeText(mapped.text,{...options,allowRemote:false,builtinOnly:true});
+        }
         if(o.environment!==environment)return;
+        if(mapped&&result?.actions?.length)chat.add((mapped.existing?'这条描述继续呈现':'这条描述接入')+'《'+mapped.title+'》，可发送“暂停”“停火”或“复原”。','场景映射');
         chat.add(result?.message||result?.reply||(result?.actions?.length?'事件已执行。':'这条事件描述没有执行，请使用事件面板中的示例。'),result?.actions?.length?'已执行':'未执行');
         if(result?.warning)chat.add(result.warning,'提示');
       }catch(error){chat.add(error.message||'事件执行失败，请重试。','未执行');}
@@ -103,9 +139,10 @@
       this.dialog.querySelector('.co-note').textContent=station?'在当前空间站观察事件与人员、机器人的反应。选择示例会填入聊天框，按 Enter 执行；事件自动发展，左侧舱内画面实时显示乘员与机器人，可自由转动视角和进入舱段观察。':'在现有空间里观察事件、机器人与人员反应。选择示例会填入聊天框，按 Enter 执行。';
       $('co-event-scope').textContent=station?'当前：空间站 · 轨道交会、空间碎片、太阳风暴、舱段故障与天地通话。':'当前：'+o.locationName();
       $('co-event-tools').textContent=station?'空间站事件实验':'事件与机器人实验';$('co-event-shortcut').textContent='事件实验';
-      for(const id of ['co-event-library','co-event-army','co-event-observe','co-event-cloud','co-event-style'])$(id).disabled=station;
+      $('co-event-library').hidden=false;$('co-event-library').disabled=o.switching;
+      for(const id of ['co-event-army','co-event-observe','co-event-cloud','co-event-style'])$(id).disabled=station;
       $('co-event-reset').disabled=false;$('co-event-reset').textContent=station?(o.stationExperience?.scenarios?.blocksObservation?'停止剧情 · 返回日常':'清除事件'):'复原实验';
-      for(const node of [$('co-event-library'),$('co-event-army'),$('co-event-observe'),this.dialog.querySelector('.co-event-cloud'),this.dialog.querySelector('.co-event-cloud').nextElementSibling,$('co-event-appearance')])node.hidden=station;
+      for(const node of [$('co-event-army'),$('co-event-observe'),this.dialog.querySelector('.co-event-cloud'),this.dialog.querySelector('.co-event-cloud').nextElementSibling,$('co-event-appearance')])node.hidden=station;
       $('co-event-observe').disabled=station||!L.firstPersonMode||L.firstPersonMode.starting;
       if(station){const director=o.stationExperience?.scenarios,state=director?.snapshot?.(),liveEvent=!!director?.film?.liveEvent||!!state?.orbitalEvent;$('co-event-stats').textContent=state?.active?(liveEvent?'当前空间站事件：':'正在放映：')+state.title+(state.paused?' · 已暂停':''):(C.stationEventPresets?.length||0)+' 种事件 · 在当前空间站自由观察';this.badge.hidden=true;this.statsText=null;}
       else if(counts){const summary='存活 '+counts.alive+' / '+counts.initial+' · 感染 '+counts.infected+' · 丧尸 '+counts.zombies+' · 伤亡 '+counts.dead;

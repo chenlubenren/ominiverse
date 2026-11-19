@@ -11,6 +11,31 @@ body[data-building-phase=intro] :is(#co-scene-nav,#collaboration-open){display:n
 .co-heading small{font:9px monospace;letter-spacing:1.4px;color:#819bb7}.co-heading h2{font-size:21px;font-weight:400;margin:8px 0 0}.co-close{border:0;background:none;color:#7693b3;font-size:24px;cursor:pointer}
 #collaboration-panel h3{font-size:12px;font-weight:500;margin:22px 0 10px}.co-scene-options{display:flex;gap:7px}.co-scene-options button,.co-asset-list button,.co-action{border:1px solid #d3e2f2;background:#fff;color:var(--building-ink,#44627a);border-radius:6px;padding:10px 12px;font:11px 'Microsoft YaHei',sans-serif;cursor:pointer}.co-scene-options button{flex:1}.co-scene-options button[aria-pressed=true],.co-action.primary{background:var(--building-accent,#2589df);color:#fff;border-color:transparent}.co-asset-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.co-asset-list button{text-align:left;line-height:1.8}.co-asset-list small{display:block;font-size:9px;color:#8aa0b7}.co-asset-list button>b{font-size:11px;font-weight:500}.co-note{font-size:10px;line-height:1.9;color:#8a9eb4;margin:12px 0}.co-action{display:inline-flex;justify-content:center;align-items:center;gap:15px}.co-action.primary{width:100%;margin-top:12px}.co-action:disabled{opacity:.5;cursor:wait}.co-metrics{display:flex;gap:25px;margin:20px 0 12px;border-top:1px solid #deebf7;padding-top:15px}.co-metrics b{font:23px monospace;display:block;color:#5688b8}.co-metrics small{font-size:9px;color:#8ba2bb}.co-robot-list{max-height:190px;overflow:auto}.co-robot-item{display:flex;gap:8px;align-items:center;border-bottom:1px solid #e3edf6;padding:10px 0}.co-robot-item>div{flex:1;min-width:0}.co-robot-item b{display:block;font-size:11px;font-weight:500}.co-robot-item small{display:block;color:#90a4bb;font-size:9px;margin-top:4px}.co-robot-item button{border:0;border-radius:4px;padding:7px;background:#eaf2fb;color:#6485a8;font-size:9px;cursor:pointer}.co-events{font-size:10px;color:#7b96b0;line-height:1.9;max-height:95px;overflow:auto;margin-top:12px}.co-panel-actions{display:flex;gap:7px;margin-top:14px}
 #co-scene-transition{position:fixed;inset:0;z-index:150;background:transparent;color:#dce6ef;display:flex;align-items:flex-end;justify-content:center;padding:0 20px 36px;box-sizing:border-box;font-size:12px;letter-spacing:1px;text-shadow:0 1px 8px #02070d;opacity:0;pointer-events:none;transition:opacity .25s}#co-scene-transition.active{opacity:1;pointer-events:auto}
+.co-travel-loading{display:none}
+body[data-co-travel=station][data-co-travel-phase=loading] #co-scene-transition{align-items:center;padding:24px 16px;background:#eaf3f9bf;text-shadow:none;transition:none}
+body[data-co-travel=station][data-co-travel-phase=loading] #co-travel-status{display:none}
+body[data-co-travel=station][data-co-travel-phase=loading] .co-travel-loading{display:flex;flex-direction:column;align-items:center;width:min(440px,100%);max-height:calc(100dvh - 48px);overflow:auto;padding:28px 30px 24px;border:1px solid #fff;border-radius:18px;background:linear-gradient(155deg,#fff,#f4f9ff);box-shadow:0 18px 80px #264b6e26;color:#416886;text-align:center;letter-spacing:0}
+.co-travel-loading>img{width:48px;height:48px;margin-bottom:8px;animation:co-travel-float 3s ease-in-out infinite}
+.co-travel-brand{color:#2589df;font:600 24px/1.2 'Segoe UI',sans-serif;letter-spacing:-.7px}
+#co-travel-title{margin:22px 0 8px;font-size:19px;font-weight:500;line-height:1.5;color:#335d80}
+#co-travel-detail{min-height:3.6em;margin:0;color:#6e8ba3;font-size:12px;line-height:1.8;text-wrap:balance}
+.co-travel-progress-heading{align-self:stretch;display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px;font-size:10px;color:#8aa2b8}
+#co-travel-percent{font:500 25px/1 Consolas,monospace;color:#2589df;font-variant-numeric:tabular-nums}
+#co-travel-progress{position:relative;align-self:stretch;height:9px;flex:none;overflow:hidden;border-radius:10px;background:#dcecf8}
+#co-travel-fill{display:block;width:100%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2589df,#49b7ff);transform:scaleX(0);transform-origin:left;transition:transform .45s linear}
+#co-travel-progress::after{content:"";position:absolute;inset:0 auto 0 0;width:45%;background:linear-gradient(90deg,transparent,#c6efffbd,transparent);transform:translateX(-120%);animation:co-travel-sweep 1.7s linear infinite;will-change:transform}
+.co-travel-loading-foot{align-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px;color:#8ca4b8;font-size:10px;line-height:1.8;text-align:left}
+#co-travel-elapsed{flex:none;font-family:Consolas,monospace;font-variant-numeric:tabular-nums}
+#co-travel-actions{display:flex;justify-content:center;gap:10px;align-self:stretch;margin-top:22px}
+#co-travel-actions[hidden]{display:none}
+#co-travel-actions button{border:1px solid #c9dfef;border-radius:8px;padding:10px 16px;background:#fff;color:#557e9f;font:12px 'Microsoft YaHei',sans-serif;cursor:pointer}
+#co-travel-actions #co-travel-retry{background:#2589df;color:white;border-color:#2589df}
+#co-travel-actions button:focus-visible{outline:3px solid #2589df;outline-offset:3px}
+body[data-co-load-error] #co-travel-progress::after,body[data-co-load-error] .co-travel-loading>img{animation:none}
+@keyframes co-travel-sweep{to{transform:translateX(325%)}}
+@keyframes co-travel-float{50%{transform:translateY(-3px)}}
+@media(max-width:480px){body[data-co-travel=station][data-co-travel-phase=loading] .co-travel-loading{padding:22px 20px}#co-travel-title{font-size:17px;margin-top:18px}#co-travel-detail{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.co-travel-loading>img,#co-travel-progress::after{animation:none}#co-travel-progress::after{opacity:0}#co-travel-fill{transition:none}}
 body[data-co-environment][data-co-travel] #co-scene-nav{background:var(--co-transition-panel,#f7fbfe);transition:none}
 body[data-co-travel] #co-scene-nav button:not([aria-pressed=true]){color:var(--co-transition-ink,#617f98)}
 body[data-co-travel] :is(#station-ui,#building-ui,#building-floor-sidebar,#co-environment-ui,#co-observation-chat,#character-assets-open,#collaboration-open,.app-header,.viewport-toolbar,.playback-bar,#society-activity-panel){opacity:var(--co-travel-reveal,1)}

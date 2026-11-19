@@ -4,3 +4,16 @@
 .library-preview-note{margin:0;color:#69829e;font-size:13px;line-height:1.7}#library-generation-preview{cursor:grab;touch-action:none;user-select:none}#library-generation-preview.is-dragging{cursor:grabbing}.library-preview-retry{margin-left:10px;padding:5px 10px;background:#eaf1fa;color:#426a96;border:1px solid #cddced;border-radius:6px;cursor:pointer}
 
 .robot-library{box-sizing:border-box;overflow:auto}.robot-library input,.robot-library select,.robot-library textarea{box-sizing:border-box;max-width:100%;min-width:0}.robot-library .library-close{border:0;cursor:pointer}.library-studio-grid>section{min-width:0}@media(max-width:420px){#library-grid{grid-template-columns:minmax(0,1fr)}.robot-library h2{font-size:24px}.library-tools{gap:12px}}
+
+#robot-library-panel [hidden]{display:none!important}
+#robot-library-panel{width:min(1180px,calc(100vw - 40px));padding:26px}
+#robot-library-panel h2{font-size:24px;margin:6px 0 10px}
+#library-description{font-size:12px;line-height:1.7;color:#7893ae;margin:0 0 20px}
+.library-customize-action{display:flex;align-items:center;gap:16px;width:100%;padding:18px 20px;border:1px solid #c9dff3;border-radius:12px;background:linear-gradient(110deg,#e8f3ff,#f4f9ff);color:#356a99;text-align:left;cursor:pointer}
+.library-customize-action>span:nth-child(2){flex:1;display:grid;gap:5px}.library-customize-action b{font-size:15px;font-weight:600}.library-customize-action small{font-size:11px;letter-spacing:0;color:#718fa9}.library-customize-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#fff;font-size:25px;font-weight:300}.library-customize-action:hover{border-color:#79b4e3;background:#e6f2ff}
+.library-catalog-title{margin:24px 0 0;font-size:16px;font-weight:600}.library-tools{gap:12px;margin:14px 0}.library-tools select,.library-tools input{padding:9px;font-size:12px}.library-tools label{font-size:11px;gap:6px}
+#library-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}#robot-library-panel .library-card{padding:12px}#robot-library-panel .library-card h3{font-size:14px}#robot-library-panel .library-card p{font-size:11px;min-height:32px}
+#library-customization-back{padding:8px 0;margin-bottom:16px;border:0;background:none;color:#477da8;font:12px 'Microsoft YaHei',sans-serif;cursor:pointer}
+#library-customization .co-studio-grid{gap:24px}#library-customization #co-chat{height:170px}#library-customization #co-preview{height:300px}#library-customization .co-studio-form input,#library-customization .co-studio-form select{font-size:12px;padding:9px}
+#robot-library-panel button:focus-visible{outline:2px solid #2589df;outline-offset:3px}
+@media(max-width:760px){#robot-library-panel{padding:18px}#library-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.library-customize-action{padding:14px;gap:10px}}

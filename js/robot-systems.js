@@ -39,17 +39,17 @@
     installUI(){
       const button=document.createElement('button');button.id='robot-army-open';button.className='co-action';button.textContent='机器人对抗实验';button.onclick=()=>{const panel=$('collaboration-panel');panel?.close();this.army.open();};
       const host=$('collaboration-panel');if(host)host.querySelector('.co-panel-actions')?.after(button);else document.body.append(button);this.armyButton=button;
-      const library=document.createElement('button');library.id='robot-library-open';library.className='co-action';library.textContent='机器人库与生成';library.onclick=()=>{host?.close();L.robotLibrary?.open();};host?.querySelector('.co-panel-actions')?.append(library);this.libraryButton=library;
+      const library=document.createElement('button');library.id='robot-library-open';library.className='co-action';library.textContent='机器人库与生成';library.onclick=()=>L.collaboration?.openRobotLibrary();host?.querySelector('.co-panel-actions')?.append(library);this.libraryButton=library;
     }
     open(){return this.army.open();}
     update(dt,now=performance.now(),environment=L.collaboration?.environment||'office',switching=false){
       this.environment=environment;this.army.environment=this.duty.environment=environment;L.robotContacts.invalidate();
       const station=environment==='station',hidden=station||switching;
-      this.armyButton.hidden=hidden;this.libraryButton.hidden=hidden;
+      this.armyButton.hidden=hidden;this.libraryButton.hidden=switching;
       if(L.robotConflict)L.robotConflict.fx.group.visible=!hidden;if(L.robotCargo)L.robotCargo.fx.group.visible=!hidden;
       if(this.legacy){this.legacy.environment=environment;$('office-robots-options').hidden=hidden||environment!=='office';if(hidden||environment!=='office'){this.legacy.group.visible=false;this.legacy.dialog.close();$('robot-monitor').hidden=true;}}
-      if(this.mode){this.mode.launchButton.hidden=hidden||this.mode.active;if(this.mode.buildingButton){this.mode.buildingButton.hidden=hidden||environment!=='office'||this.b.phase!=='overview'||this.mode.active;this.mode.buildingButton.disabled=this.mode.starting||!!(this.b.matrixLab?.active||this.b.matrixLab?.busy);}if((this.mode.active||this.mode.starting)&&environment!=='office'&&!switching)this.mode.stop(false);this.mode.cameraGroup.visible=!hidden&&environment==='office';$('exploration-hud').hidden=hidden||!this.mode.active;}
-      if(hidden){L.robotLibrary?.close();this.army.group.visible=this.duty.group.visible=false;if(station){$('robot-army-panel')?.close();$('stealth-task-dialog')?.close();}return;}
+      if(this.mode){if(hidden||environment!=='office')this.mode.roleDialog?.close();this.mode.launchButton.hidden=hidden||environment!=='office'||this.mode.active;if(this.mode.buildingButton){this.mode.buildingButton.hidden=hidden||environment!=='office'||this.b.phase!=='overview'||this.mode.active;this.mode.buildingButton.disabled=this.mode.starting||!!(this.b.matrixLab?.active||this.b.matrixLab?.busy);}if((this.mode.active||this.mode.starting)&&environment!=='office'&&!switching)this.mode.stop(false);this.mode.cameraGroup.visible=!hidden&&environment==='office';$('exploration-hud').hidden=hidden||!this.mode.active;}
+      if(hidden){if(switching)L.robotLibrary?.close();this.army.group.visible=this.duty.group.visible=false;if(station){$('robot-army-panel')?.close();$('stealth-task-dialog')?.close();}return;}
       const running=!document.hidden&&(environment==='campus'?L.collaboration?.externalRunning:this.b.phase==='interior'?L.app.running:this.b.society.running)&&!this.b.matrixLab?.active&&!L.robotLibrary?.panel?.open&&!L.robotLibrary?.studio?.open;
       const seconds=running&&Number.isFinite(dt)?Math.max(0,dt):0;
       this.army.group.visible=true;this.duty.group.visible=environment==='office';

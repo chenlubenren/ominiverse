@@ -6,7 +6,7 @@ Ominispace 是办公楼、园区与空间站中的人机协同三维体验，包
 
 ## 获取与启动
 
-需要 Node.js 20 或更新版本，以及 [Git LFS](https://git-lfs.com/)。模型、纹理、视频等二进制资源使用 Git LFS，完整下载约 1.46 GiB。
+需要 Node.js 20 或更新版本，以及 [Git LFS](https://git-lfs.com/)。模型、纹理、视频等二进制资源使用 Git LFS，完整下载约 1.5 GiB。
 
 ```bash
 git lfs install
@@ -17,7 +17,7 @@ npm ci
 npm start
 ```
 
-打开 <http://127.0.0.1:8910/>。需要支持 WebGL 的现代浏览器；首次加载模型和影片可能较慢。请使用包含 LFS 实际文件的克隆副本，避免把资源指针文件当作模型运行。
+打开 <http://127.0.0.1:8910/>。需要支持 WebGL 的现代浏览器。启动页会显示加载进度和玩法指南，办公楼与空间站准备完成后进入场景；首次加载时间受网络与显卡影响。请使用包含 LFS 实际文件的克隆副本，避免把资源指针文件当作模型运行。
 
 基础场景、已有模型和本地规则无需 API Key。云端智能解析与新模型生成需要另行配置服务；新模型生成还需要 Blender，且可能产生上游费用。
 
@@ -36,7 +36,7 @@ npm start
 | `index.html`、根目录 CSS、`js/` | 主界面、样式和浏览器代码 |
 | `assets/` | 正式模型、纹理、影片、音频与来源记录 |
 | `server.cjs`、`scripts/` | Node.js 服务和运行所需处理程序 |
-| `deploy/` | systemd、nginx 和证书续期示例 |
+| `deploy/` | systemd、nginx、证书续期与可选 Linux 网络配置示例 |
 | `asset-studio.html`、`station-designs.html` | 角色预览与空间站方案页面 |
 
 `.runtime/`、`.cache/` 会在运行时按需创建；它们包含任务或缓存，不应提交。第三方代码与素材的许可证、署名和来源保留在 `js/vendor/`、`js/station-designs/` 和对应 `assets/` 目录中，使用时请遵循各自许可。

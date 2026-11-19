@@ -13,7 +13,7 @@
    if(this.busy)throw Error('上一条事件仍在处理中，请稍候。');const context=this.context(options),token=this.generation;this.assertContext(context);
    if(window.DisasterCommands.isNonCommand(text))return {message:'疑问、假设或否定描述不会触发场景事件。',actions:[],source:'local'};
    this.busy=true;
-   try{window.DisasterCommands.validExplicitNumbers(text);if(L.robotLibrary)await L.robotLibrary.ready;if(!this.requestValid(token,context))throw Error('场景已切换或复原，本次事件已取消。');const local=L.robotLibrary?.plan(text,context)||window.DisasterCommands.parse(text,context);let plan=local;
+   try{window.DisasterCommands.validExplicitNumbers(text);if(L.robotLibrary)await L.robotLibrary.ready;if(!this.requestValid(token,context))throw Error('场景已切换或复原，本次事件已取消。');const preset=window.MegastructureProtocol?.wholeSpawn(text,context)||window.MegastructureProtocol?.isBuildingAttack(text);const local=(options.builtinOnly||preset?null:L.robotLibrary?.plan(text,context))||window.DisasterCommands.parse(text,context);let plan=local;
     if(options.allowRemote===true&&!window.DisasterCommands.shouldUseLocal(text,context,local)){
      try{const response=await fetch('/__disaster_director__',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,context,history:this.history.slice(-6)}),signal:AbortSignal.timeout(30000)});if(response.status===404)throw Error('服务暂不可用');const data=await response.json();if(!response.ok){const error=Error(data.error||'解析失败');error.validation=true;throw error;}plan={...window.DisasterCommands.validate(data,context),source:data.source||'local',warning:data.warning};}
      catch(error){if(error.validation)throw error;plan={...local,warning:'智能解析暂不可用，已使用本地明确指令。'};}

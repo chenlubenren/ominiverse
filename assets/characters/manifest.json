@@ -24,20 +24,30 @@
           "alphaMode": "MASK"
         }
       ],
-      "bytes": 5053696,
-      "sha256": "5bd2daf9cd3e675c227e94a085622b53ca85fd8e998969f99ec5c459ec64b112",
+      "bytes": 2398956,
+      "sha256": "89afa8f74f4226689e6bb0f65e73cbeda3784d6e3913b12caa9f4d577071f180",
       "id": "clay-male",
       "name": "写实素模男乘员",
       "gender": "male",
       "kind": "human",
       "clay": true,
-      "url": "assets/characters/clay-male.glb",
+      "url": "assets/characters/clay-male.89afa8f74f42.glb",
       "height": 1.789,
       "sourceTriangles": 7312,
       "sourceName": "Male_Adult_02",
       "sourceUrl": "https://github.com/microsoft/Microsoft-Rocketbox/blob/0943055db6ec570bcef9f2c8b41c9e5467c808f9/Assets/Avatars/Adults/Male_Adult_02/Export/Male_Adult_02.fbx",
       "sourceSha256": "1c65e292e9057a23f7f70969f6971c631c1316fcaaf93e575a4557201c835018",
-      "license": "MIT"
+      "license": "MIT",
+      "fallbackUrl": "assets/characters/clay-male.glb",
+      "textureEncoding": "webp",
+      "sourceAssetBytes": 5053696,
+      "sourceAssetSha256": "5bd2daf9cd3e675c227e94a085622b53ca85fd8e998969f99ec5c459ec64b112",
+      "textureProfile": {
+        "name": "balanced-512-q80",
+        "normalMaxSize": 512,
+        "normalQuality": 80,
+        "coverage": "original-resolution-lossless"
+      }
     },
     {
       "triangles": 52392,
@@ -61,20 +71,30 @@
           "alphaMode": "MASK"
         }
       ],
-      "bytes": 5694808,
-      "sha256": "faaf62975ef78f96f7fd36306bb98f895674478cd52792d6829a27de4c494429",
+      "bytes": 2832720,
+      "sha256": "f618efe743211bba08c6a1fd03838ae44788ebbeff380ea782ea83b42a8452c6",
       "id": "clay-female",
       "name": "写实素模女乘员",
       "gender": "female",
       "kind": "human",
       "clay": true,
-      "url": "assets/characters/clay-female.glb",
+      "url": "assets/characters/clay-female.f618efe74321.glb",
       "height": 1.789,
       "sourceTriangles": 8732,
       "sourceName": "Female_Adult_01",
       "sourceUrl": "https://github.com/microsoft/Microsoft-Rocketbox/blob/0943055db6ec570bcef9f2c8b41c9e5467c808f9/Assets/Avatars/Adults/Female_Adult_01/Export/Female_Adult_01.fbx",
       "sourceSha256": "8cbaf86576004b96469bc80df123b97fef788f4a7bb3f3eaa616fcfaf55698a3",
-      "license": "MIT"
+      "license": "MIT",
+      "fallbackUrl": "assets/characters/clay-female.glb",
+      "textureEncoding": "webp",
+      "sourceAssetBytes": 5694808,
+      "sourceAssetSha256": "faaf62975ef78f96f7fd36306bb98f895674478cd52792d6829a27de4c494429",
+      "textureProfile": {
+        "name": "balanced-512-q80",
+        "normalMaxSize": 512,
+        "normalQuality": 80,
+        "coverage": "original-resolution-lossless"
+      }
     },
     {
       "id": "station-crew-male",

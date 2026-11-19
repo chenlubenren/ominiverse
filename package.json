@@ -22,6 +22,7 @@
     "station-designs.html",
     "*.css",
     "server.cjs",
+    "scripts/web-assets.cjs",
     "requirements-usd.txt",
     "js/",
     "assets/",

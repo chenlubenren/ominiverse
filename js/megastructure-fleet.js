@@ -7,13 +7,27 @@
  const forwardRotation=n=>new T.Quaternion().setFromAxisAngle(up,Math.atan2(-n.x,-n.z));
  const counters=()=>({launched:0,contacts:0,impacts:0,glass:0,panels:0,misses:0});
  class MegastructureFleet {
-  constructor(b){this.b=b;this.v=b.view;this.robots=[];this.projectiles=[];this.contactLog=[];this.serial=0;this.time=0;this.generation=0;this.stats=counters();this.group=new T.Group();this.group.name='楼外巨构机器人';this.group.userData.noAO=true;this.group.userData.ignoreCollision=true;this.v.scene.add(this.group);
+  constructor(b){this.b=b;this.v=b.view;this.robots=[];this.projectiles=[];this.contactLog=[];this.serial=0;this.time=0;this.generation=0;this.attackRevision=0;this.attackerPreparations=new Map();this.stats=counters();this.group=new T.Group();this.group.name='楼外巨构机器人';this.group.userData.noAO=true;this.group.userData.ignoreCollision=true;this.v.scene.add(this.group);
 
   }
   async execute(raw){L.disasterDirector.assertContext();const requestValid=typeof raw.requestValid==='function'?raw.requestValid:()=>true;if(!requestValid())return '巨构控制已取消。';const a=P.validate(raw),chosen=()=>this.robots.filter(r=>['all','random'].includes(a.robotType)||r.type===a.robotType);
+   if(['stop','pause','patrol','clear'].includes(a.operation))this.attackRevision++;
    if(a.operation==='clear'){const n=chosen().length;this.clear(a.robotType);return '已移除 '+n+' 台巨构机器人；输入“复原”可恢复建筑。';}
-   if(a.operation==='spawn')return this.spawn({...a,paused:raw.paused===true},requestValid);const robots=chosen();if(!robots.length)throw Error('场景中没有对应的巨构机器人，请先输入如“生成5个巨头飞龙机器人”。');
-   if(a.operation==='attack'){const generation=this.generation,d=L.disasterDirector,context=d.context(),token=d.generation;d.physics??=new L.DisasterPhysics(d);await d.physics.prepare();if(generation!==this.generation||!d.requestValid(token,context)||!requestValid())return '巨构控制已取消。';for(const r of robots){r.attacking=true;r.returning=null;r.flight=null;r.paused=false;r.power=a.intensity;r.nextAttack=r.elapsed+.4+(r.id%7)*.3;if(r.motion==='crawl')this.startClimb(r);this.b.reactions.buildingAttack?.(r);}return robots.length+' 台巨构机器人正在接近幕墙；嘴部、手部或腕足实际击中后才会触发局部破碎。';}
+   if(a.operation==='spawn')return this.spawn({...a,paused:raw.paused===true},requestValid);let robots=chosen();
+   if(a.operation==='attack'){
+    const generation=this.generation,revision=this.attackRevision,d=L.disasterDirector,context=d.context(),token=d.generation,valid=()=>generation===this.generation&&revision===this.attackRevision&&d.requestValid(token,context)&&requestValid();let generated=false;
+    if(!robots.length){
+     // A building attack is a complete scene request. Supply one visible
+     // attacker when none exists, and reuse the same pending creation across
+     // concurrent requests. Stops/resets invalidate it before any model lands.
+     const robotType=['all','random'].includes(a.robotType)?'dragon':a.robotType,key=generation+':'+revision+':'+robotType;
+     let pending=this.attackerPreparations.get(key);if(!pending){pending=this.spawn({...a,operation:'spawn',robotType,attack:false},valid);this.attackerPreparations.set(key,pending);}
+     try{await pending;}finally{if(this.attackerPreparations.get(key)===pending)this.attackerPreparations.delete(key);}
+     if(!valid())return '巨构控制已取消。';robots=chosen();if(!robots.length)return '巨构控制已取消。';generated=true;
+    }
+    d.physics??=new L.DisasterPhysics(d);await d.physics.prepare();if(!valid())return '巨构控制已取消。';for(const r of robots){r.attacking=true;r.returning=null;r.flight=null;r.paused=false;r.power=a.intensity;r.nextAttack=r.elapsed+.4+(r.id%7)*.3;if(r.motion==='crawl')this.startClimb(r);this.b.reactions.buildingAttack?.(r);}return(generated?'已补充 '+robots.length+' 台'+robots[0].name+'作为楼外攻击者。':'')+robots.length+' 台巨构机器人正在接近幕墙；嘴部、手部或腕足实际击中后才会触发局部破碎。';
+   }
+   if(!robots.length){if(['stop','pause','patrol','resume'].includes(a.operation))return a.operation==='resume'?'当前没有对应的巨构机器人可以恢复，场景保持原状。':'当前没有对应的巨构机器人，已取消待执行的攻击。';throw Error('场景中没有对应的巨构机器人，请先生成后再控制。');}
    if(a.operation==='climb'){const crawlers=robots.filter(r=>r.motion==='crawl');if(!crawlers.length)throw Error('只有章鱼、猎蛛和巨蛇可以攀附外墙；飞龙飞行，泰坦仅在地面行走。');for(const r of crawlers){r.paused=false;r.climbAt=r.elapsed;this.startClimb(r);}return crawlers.length+' 台巨构机器人正在攀附建筑外表皮。';}
    for(const r of robots){if(a.operation==='pause')r.paused=true;else if(a.operation==='resume')r.paused=false;else{const wasAttacking=r.attacking;r.attacking=false;r.paused=false;if((r.attack||wasAttacking)&&r.motion!=='crawl')r.returning={from:r.position.clone(),rotation:r.quaternion.clone(),at:r.elapsed};r.attack=null;if(r.motion==='flight')r.flight=null;}}
    return a.operation==='pause'?'已暂停这些巨构机器人的移动和攻击。':a.operation==='resume'?'已恢复这些巨构机器人的活动。':'已停止攻击，巨构机器人继续在建筑外巡游。';
@@ -120,7 +134,7 @@
    if(run&&Number.isFinite(dt)&&dt>0)for(let remaining=dt;remaining>1e-9;){const step=Math.min(.05,remaining);this.advance(step);remaining-=step;}
    const accent=this.accent();for(const r of this.robots)r.rig.setTheme(accent);
   }
-  syncFrame(){const b=this.b;L.syncDisasterFrame(this.group,b);this.group.visible=this.active!==false&&this.robots.length>0&&L.collaboration?.environment!=='station'&&!L.collaboration?.switching&&!b.matrixLab?.active;this.group.updateMatrixWorld(true);}
+  syncFrame(){const b=this.b;L.syncDisasterFrame(this.group,b);this.group.visible=this.active!==false&&this.robots.length>0&&L.collaboration?.environment!=='station'&&!L.collaboration?.switching&&!b.matrixLab?.active&&!(b.floorFocus?.interior&&b.floorFocus.strength>=1);this.group.updateMatrixWorld(true);}
   remove(r){this.group.remove(r.root);L.dispose(r.root);this.robots=this.robots.filter(q=>q!==r);}
   clear(type='all'){this.generation++;for(const r of [...this.robots])if(['all','random'].includes(type)||r.type===type)this.remove(r);if(!this.robots.length){this.time=0;this.stats=counters();this.contactLog=[];}this.syncFrame();}
   summary(){return {total:this.robots.length,attacking:this.robots.filter(r=>r.attacking).length,robots:this.robots.map(r=>({id:r.id,type:r.type,state:r.state,motion:r.motion,mode:r.mode,height:r.height,position:r.position.toArray(),joints:r.rig.joints.length,planted:r.gait?.planted})),...this.stats};}

@@ -4,18 +4,29 @@
   const C=window.CoScene=window.CoScene||{};
   window.addEventListener('keydown',event=>window.IndoorLab?.collaboration?.chat?.handleKey(event),true);
   for(const type of ['pointerdown','pointerup','click','dblclick','contextmenu'])window.addEventListener(type,event=>window.IndoorLab?.collaboration?.chat?.handlePointer(event),true);
+  // These examples use the same natural-language routes as a typed message.
+  const suggestionGroups={
+    office:[['3楼发生火灾','火灾 起火 冒烟 故事'],['大楼受到攻击','大楼 攻击 机器人'],['生成2个飞龙机器人','飞龙 巨龙 机器人 召唤'],['放置送餐机器人','部署 放置 机器人 协作'],['装饰改成橙色','装饰 颜色 橙色'],['放置绿植','绿植 植物 布置'],['在园区放置机器狗','园区 机器狗 部署'],['复原','清除 恢复 灾害']],
+    interior:[['当前楼层发生火灾','火灾 起火 冒烟 故事'],['放置绿植','绿植 植物 布置'],['装饰改成橙色','装饰 颜色 橙色'],['放置送餐机器人，先巡检再补给','部署 放置 机器人 任务 巡检'],['地板改成蓝色','地板 颜色 蓝色'],['放置补给箱','物资 补给箱 布置'],['生成2个飞龙机器人','飞龙 巨龙 机器人 召唤'],['复原','清除 恢复 灾害']],
+    campus:[['放置绿植','绿植 植物 布置'],['放置座椅','座椅 椅子 布置'],['放置机器狗','机器狗 机器人 部署'],['生成2个飞龙机器人','飞龙 巨龙 机器人 召唤'],['装饰改成橙色','装饰 颜色 橙色'],['放置送餐机器人','送餐 机器人 部署'],['在3楼放置送餐机器人','楼层 机器人 部署'],['复原','清除 恢复 灾害']],
+    station:[['有一颗失效卫星正在靠近空间站','卫星 靠近 攻击 机械臂 故事'],['来一场太阳风暴','太阳 风暴 故事'],['让当前舱的设备发生电弧火情','火灾 起火 火情 电弧 故事'],['放置随行飞球，先巡检再补给','机器人 随行 飞球 部署 巡检 任务'],['天舟货运飞船来送补给','天舟 货运 飞船 补给 故事'],['舱内装饰改成橙色','装饰 颜色 橙色'],['让当前舱断电','断电 停电 故事'],['清除事件','清除 恢复 事件']]
+  };
   class ObservationChat {
     constructor(owner){
       this.owner=owner;this.markers=new C.SceneMarkers(owner);this.commands=new C.SceneCommands(owner);this.messages=[];this.editing=false;this.composing=false;this.compositionEnded=-Infinity;
       this.root=document.createElement('section');this.root.id='co-observation-chat';this.root.hidden=true;this.root.setAttribute('aria-label','场景聊天');
-      this.root.innerHTML='<div id="co-observation-log" role="log" aria-label="消息记录" aria-live="polite" aria-relevant="additions" tabindex="0"></div><button id="co-chat-activate" type="button"><span>↵</span> 按 Enter 输入消息</button><form id="co-observation-form" hidden><label for="co-observation-input">我</label><textarea id="co-observation-input" rows="1" maxlength="500" placeholder="说点什么…" autocomplete="off" aria-label="发送场景消息" title="Enter 发送 · Shift+Enter 换行 · Esc 收起"></textarea><button type="submit" aria-label="发送消息" title="Enter 发送">↵</button><div class="co-chat-tools"><button id="co-chat-pin" type="button" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 18s6-6.3 6-11A6 6 0 0 0 4 7c0 4.7 6 11 6 11Z"/><circle cx="10" cy="7" r="2"/></svg>标记位置</button><div id="co-chat-location" hidden><span></span><button type="button" aria-label="移除位置标记">×</button></div><span class="co-chat-escape">Esc 收起</span></div></form>';
+      this.root.innerHTML='<div id="co-observation-log" role="log" aria-label="消息记录" aria-live="polite" aria-relevant="additions" tabindex="0"></div><button id="co-chat-activate" type="button"><span>↵</span> 按 Enter 输入消息</button><form id="co-observation-form" hidden><div id="co-chat-suggestions" aria-label="自然语言示例"><div class="co-chat-suggestion-heading"><span id="co-chat-suggestion-hint">试试这样说 · 点击填入</span><button id="co-chat-suggestions-next" type="button" aria-label="换一组自然语言示例">换一组 ↻</button></div><div id="co-chat-suggestion-list"></div></div><label for="co-observation-input">我</label><textarea id="co-observation-input" rows="1" maxlength="500" placeholder="描述想发生的事…" autocomplete="off" aria-label="发送场景消息" title="Enter 发送 · Shift+Enter 换行 · Esc 收起"></textarea><button type="submit" aria-label="发送消息" title="Enter 发送">↵</button><div class="co-chat-tools"><button id="co-chat-pin" type="button" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 18s6-6.3 6-11A6 6 0 0 0 4 7c0 4.7 6 11 6 11Z"/><circle cx="10" cy="7" r="2"/></svg>标记位置</button><div id="co-chat-location" hidden><span></span><button type="button" aria-label="移除位置标记">×</button></div><span class="co-chat-escape">Esc 收起</span></div></form>';
       document.body.appendChild(this.root);this.log=document.getElementById('co-observation-log');this.input=document.getElementById('co-observation-input');this.form=document.getElementById('co-observation-form');this.activate=document.getElementById('co-chat-activate');
       this.locationChip=document.getElementById('co-chat-location');this.pinButton=document.getElementById('co-chat-pin');this.pinButton.onclick=()=>this.togglePick();this.locationChip.querySelector('button').onclick=()=>{this.markers.remove(this.pendingLocation.id);this.pendingLocation=null;this.locationChip.hidden=true;this.input.focus();};
       this.pickHint=document.createElement('div');this.pickHint.id='co-location-pick-hint';this.pickHint.hidden=true;this.pickHint.textContent='点击场景标记位置 · Esc 取消';document.body.appendChild(this.pickHint);
       this.activate.onclick=()=>this.open();this.form.onsubmit=e=>{e.preventDefault();if(!this.composing)this.send();};
       this.input.addEventListener('compositionstart',()=>this.composing=true);
-      this.input.addEventListener('compositionend',()=>{this.composing=false;this.compositionEnded=performance.now();});
-      this.input.addEventListener('input',()=>this.resizeInput());
+      this.input.addEventListener('compositionend',()=>{this.composing=false;this.compositionEnded=performance.now();this.renderSuggestions();});
+      this.suggestionList=document.getElementById('co-chat-suggestion-list');this.suggestionNext=document.getElementById('co-chat-suggestions-next');this.suggestionPage=0;
+      document.getElementById('co-chat-suggestions').onpointerdown=e=>{if(e.button===0&&e.target.closest('button'))e.preventDefault();};
+      this.suggestionNext.onclick=()=>{if(this.composing)return;this.suggestionPage++;this.renderSuggestions();};
+      this.suggestionList.onclick=e=>{const button=e.target.closest('[data-chat-suggestion]');if(!button||!this.editing||this.composing)return;this.input.value=button.dataset.chatSuggestion;this.resizeInput();this.input.focus({preventScroll:true});this.input.setSelectionRange(this.input.value.length,this.input.value.length);};
+      this.input.addEventListener('input',()=>{this.suggestionPage=0;if(!this.composing)this.renderSuggestions();this.resizeInput();});
       this.root.addEventListener('click',e=>e.stopPropagation());
       document.addEventListener('pointerdown',e=>{if(this.editing&&!this.picking&&!this.root.contains(e.target))this.close(false);},true);
       document.addEventListener('focusin',e=>{if(this.editing&&!this.picking&&!this.root.contains(e.target))this.close(false);});
@@ -25,6 +36,15 @@
       this.layoutObserver=new ResizeObserver(()=>{if(this.inputWidth!==this.input.clientWidth){this.inputWidth=this.input.clientWidth;this.resizeInput();}this.syncLayout();});this.layoutObserver.observe(this.root);
       window.addEventListener('resize',()=>{this.resizeInput();this.syncLayout();});
       this.sync();
+    }
+    renderSuggestions(){
+      if(!this.editing)return;const environment=this.owner.environment,key=environment==='office'&&this.owner.b.phase==='interior'?'interior':environment;
+      if(this.suggestionScene!==key){this.suggestionScene=key;this.suggestionPage=0;}
+      const entries=suggestionGroups[key]||suggestionGroups.office,query=this.input.value.trim().toLowerCase();
+      const score=entry=>{if(!query)return 0;const [text,tags]=entry;return (text.includes(query)?10:0)+tags.split(' ').filter(word=>query.includes(word)||word.includes(query)).length;};
+      const ranked=entries.map((entry,index)=>({entry,index,score:score(entry)})).sort((a,b)=>b.score-a.score||a.index-b.index),start=(this.suggestionPage%Math.ceil(ranked.length/4))*4,visible=ranked.slice(start,start+4);
+      const signature=key+'|'+visible.map(item=>item.entry[0]).join('|');if(signature===this.suggestionSignature)return;this.suggestionSignature=signature;
+      this.suggestionList.replaceChildren();for(const {entry:[text]} of visible){const button=document.createElement('button');button.type='button';button.dataset.chatSuggestion=text;button.textContent=text;button.title=text;this.suggestionList.appendChild(button);}
     }
     available(){return !window.IndoorLab.firstPersonMode?.active&&(this.owner.environment!=='office'||this.owner.b.phase!=='intro');}
     syncLayout(){
@@ -40,16 +60,16 @@
       this.input.style.removeProperty('height');this.root.style.setProperty('--co-chat-input-height',height+'px');this.input.style.overflowY=contentHeight>height?'auto':'hidden';this.syncLayout();
     }
     sync(){
-      const available=this.available();this.root.hidden=!available;document.body.toggleAttribute('data-co-chat',available);this.markers.update();this.syncLayout();
+      const available=this.available();this.root.hidden=!available;document.body.toggleAttribute('data-co-chat',available);this.markers.update();this.renderSuggestions();this.syncLayout();
       if(!available){this.close(false);return;}
-      if(!this.started){this.started=true;this.add('观测已开始。按 F 隐藏或恢复界面，聊天保留；按 Enter 输入。试试“放置绿植”“装饰改成橙色”“放置送餐机器人”，或发送“帮助”查看场景操作。','现场');}
+      if(!this.started){this.started=true;this.add('按 Enter 描述想发生的事，也可点击输入框上方的示例。','现场');}
     }
     stopMovement(){this.owner.v.walkKeys.clear();const fp=this.owner.v.firstPerson;if(fp){fp.velocity.set(0,0);fp.speed=0;fp.jumpRequested=false;}}
     open(){
       if(!this.available()||document.querySelector('dialog[open]')||this.owner.switching)return;
       // An unsent pin from another scene would send the next command back there.
       if(this.pendingLocation&&this.pendingLocation.environment!==this.owner.environment){this.markers.remove(this.pendingLocation.id);this.pendingLocation=null;this.locationChip.hidden=true;}
-      this.sync();this.editing=true;this.root.classList.add('is-editing');this.form.hidden=false;this.activate.hidden=true;
+      this.sync();this.editing=true;this.root.classList.add('is-editing');this.form.hidden=false;this.activate.hidden=true;this.suggestionPage=0;this.renderSuggestions();
       this.stopMovement();if(document.pointerLockElement)document.exitPointerLock();
       this.resizeInput();requestAnimationFrame(()=>{if(this.editing)this.resizeInput();});
       this.input.focus({preventScroll:true});this.log.scrollTop=this.log.scrollHeight;
@@ -67,6 +87,7 @@
         // Stop the original movement, interaction and menu shortcuts while typing.
         event.stopImmediatePropagation();
         if(event.isComposing||event.keyCode===229||this.composing)return;
+        if(event.target.id==='co-chat-resize'&&['ArrowUp','ArrowDown'].includes(event.key)){event.target.onkeydown?.(event);return;}
         if(event.key==='Escape'){event.preventDefault();if(this.picking)this.abandonPick();else this.close();}
         else if(event.key==='Enter'&&event.target===this.input){if(event.shiftKey&&!event.ctrlKey&&!event.metaKey&&!event.altKey)return;event.preventDefault();if(!event.repeat&&performance.now()-this.compositionEnded>80){if(this.picking)this.cancelPick();else this.send();}}
         return;

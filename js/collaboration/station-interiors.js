@@ -18,16 +18,23 @@
   C.stationModules=defs.map(([id,index,name,english,kind,width,length,color,description,features,anchor,links])=>({id,index,name,english,kind,width,length,color,description,features,anchor,links}));
   C.stationModule=id=>C.stationModules.find(m=>m.id===id);
   const material=(color,opts={})=>C.material(color,opts);
-  let library;
+  let library,texturePreparation;const textureEntries=new Map();
   function textures(){
     if(library)return library;
     const tex=(draw,w=1024,h=1024)=>{const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;draw(canvas.getContext('2d'),w,h);const t=new T.CanvasTexture(canvas);t.encoding=T.sRGBEncoding;t.anisotropy=4;return t;};
     const fabric=tex((c,w,h)=>{c.fillStyle='#e5e3da';c.fillRect(0,0,w,h);c.strokeStyle='#b9bdb6';c.lineWidth=2;for(let i=-h;i<w+h;i+=80){c.beginPath();c.moveTo(i,0);c.lineTo(i+h,h);c.stroke();c.beginPath();c.moveTo(i,h);c.lineTo(i+h,0);c.stroke();}c.fillStyle='#ffffff50';for(let i=0;i<12000;i++){const x=(i*97)%w,y=(i*127)%h;c.fillRect(x,y,1,2);}});
     const panel=tex((c,w,h)=>{c.fillStyle='#d9e0e2';c.fillRect(0,0,w,h);c.strokeStyle='#a0aeb5';c.lineWidth=5;c.strokeRect(15,15,w-30,h-30);for(const x of [32,w-32])for(const y of [32,h-32]){c.fillStyle='#72828d';c.beginPath();c.arc(x,y,7,0,7);c.fill();c.strokeStyle='#cdd4d7';c.lineWidth=2;c.beginPath();c.moveTo(x-5,y);c.lineTo(x+5,y);c.stroke();}c.fillStyle='#8a9ba7';c.font='17px monospace';c.fillText('CSS  /  SERVICE PANEL',40,h-40);for(let i=0;i<24;i++)c.fillRect(42+i*4,h-90,i%3===0?2:1,20);});
     const screen=tex((c,w,h)=>{c.fillStyle='#071d29';c.fillRect(0,0,w,h);c.fillStyle='#72d4d8';c.font='25px monospace';c.fillText('CSS  /  SYSTEM MONITOR',36,45);c.fillStyle='#c9f2ed';c.font='bold 64px monospace';c.fillText('NOMINAL',36,124);c.strokeStyle='#1b4553';c.lineWidth=1;for(let i=0;i<12;i++){c.beginPath();c.moveTo(30,170+i*23);c.lineTo(w-30,170+i*23);c.stroke();}for(let j=0;j<3;j++){c.strokeStyle=['#67d7d7','#c9b273','#79a8da'][j];c.lineWidth=3;c.beginPath();for(let i=0;i<180;i++){const x=35+i*5,y=245+j*53+Math.sin(i*.12+j)*18+Math.sin(i*.41)*5;i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();}c.fillStyle='#789aaa';c.font='20px monospace';c.fillText('TELEMETRY   //   LOCAL DEMONSTRATION',36,h-30);},1024,512);
-    const loader=new T.TextureLoader(),load=(name,color=false)=>{const t=loader.load(new URL('textures/'+name,assetBase).href);t.encoding=color?T.sRGBEncoding:T.LinearEncoding;t.anisotropy=8;return t;};
+    const loader=new T.TextureLoader(),load=(name,color=false)=>{
+      const cached=textureEntries.get(name);if(cached&&!cached.error)return cached.texture;
+      const entry={name,ready:false,error:null};entry.promise=new Promise((resolve,reject)=>{entry.texture=loader.load(new URL('textures/'+name,assetBase).href,()=>{entry.ready=true;resolve();},undefined,()=>{entry.error=Error('空间站舱内贴图未能下载完成，请重新尝试。');reject(entry.error);});});entry.promise.catch(()=>{});entry.texture.encoding=color?T.sRGBEncoding:T.LinearEncoding;entry.texture.anisotropy=8;textureEntries.set(name,entry);return entry.texture;
+    };
     library={fabric:load('fabric-color.jpg',true),fabricNormal:load('fabric-normal.jpg'),fabricRough:load('fabric-rough.jpg'),panel:load('equipment-panel.jpg',true),panelNormal:load('equipment-panel-normal.png'),metal:load('brushed-metal.jpg',true),metalRough:load('brushed-metal-roughness.jpg'),instruments:load('instrument-controls.jpg',true),screen};fabric.dispose();panel.dispose();return library;
   }
+  C.prepareStationTextures=()=>{
+    if(texturePreparation)return texturePreparation;
+    textures();texturePreparation=Promise.all([...textureEntries.values()].map(entry=>entry.promise)).then(()=>{C.stationTexturesReady=true;}).catch(error=>{library.screen.dispose();library=null;C.stationTexturesReady=false;throw error;}).finally(()=>{texturePreparation=null;});return texturePreparation;
+  };
   C.buildStationInterior=function(spec){
     const root=new T.Group();root.name='station-'+spec.id;const zones=new T.Group(),roof=new T.Group(),details=new T.Group();root.add(zones,roof,details);
     const W=spec.width,L=spec.length,H=3.4,half=L/2,tx=textures(),colliders=[],batches=new Map(),hatches=[],equipment=[],labels=[];

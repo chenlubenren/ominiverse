@@ -145,6 +145,47 @@ body[data-co-environment] :is(.building-footer,.st-foot,.co-env-status) {
 body[data-co-environment][data-co-chat] #co-observation-chat {
   display:grid;left:var(--ob-edge);right:var(--ob-edge);bottom:44px;border-radius:var(--ob-radius);
 }
+#co-chat-suggestions {display:none}
+@media(min-width:761px) {
+  body[data-co-environment][data-co-chat] #co-observation-chat {
+    right:auto;width:clamp(320px,30vw,420px);max-width:calc(100vw - 2 * var(--ob-edge));
+    box-sizing:border-box;--co-chat-editor-height:42px;
+    background:linear-gradient(145deg,#142b40d9,#142b40b8);border-color:#ffffff36;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);text-shadow:none;
+  }
+  body[data-co-environment][data-co-chat] #co-observation-chat.is-editing {
+    --co-chat-editor-height:calc(var(--co-chat-input-height,28px) + 138px);
+    background:linear-gradient(145deg,#142b40f0,#142b40db);
+  }
+  body[data-co-environment][data-co-chat] #co-chat-activate {height:42px;padding:8px 0 14px}
+  #co-observation-form {grid-template-rows:100px var(--co-chat-input-height,28px) 20px}
+  #co-observation-form>label,#co-observation-input,#co-observation-form>button {grid-row:2}
+  #co-observation-form .co-chat-tools {grid-row:3}
+  #co-chat-suggestions {display:flex;flex-direction:column;gap:6px;grid-column:1/-1;grid-row:1;min-width:0;height:100px;text-shadow:none}
+  .co-chat-suggestion-heading {display:flex;justify-content:space-between;align-items:center;gap:8px;height:18px;font-size:10px;color:#c1d5e8}
+  #co-chat-suggestions-next {flex:none;border:0;padding:0;background:none;color:#c1d5e8;font:inherit;cursor:pointer}
+  #co-chat-suggestion-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  #co-chat-suggestion-list button {height:35px;min-width:0;padding:3px 8px;text-align:left;white-space:normal;overflow-wrap:anywhere;border:1px solid #92b9de45;border-radius:7px;background:#88b6e015;color:#e4f1ff;font:11px/1.35 'Microsoft YaHei',sans-serif;cursor:pointer}
+  #co-chat-suggestion-list button:hover {background:#7cbbf130;border-color:#9bc9f385}
+  #co-chat-suggestions-next:hover {color:#fff}
+
+  /* Ground scenes keep the original glass treatment at the compact width. */
+  body:is([data-co-environment=office],[data-co-environment=campus])[data-co-chat] #co-observation-chat {
+    background:linear-gradient(145deg,#13233218,#13233208 65%,#13233203);border-color:#ffffff18;
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:#fff;
+    text-shadow:0 1px 2px #000000e6,0 0 4px #000000a6;
+  }
+  body:is([data-co-environment=office],[data-co-environment=campus])[data-co-chat] #co-observation-chat.is-editing {
+    background:linear-gradient(145deg,#13233230,#13233216 65%,#1323320a);border-color:#ffffff30;
+  }
+  body:is([data-co-environment=office],[data-co-environment=campus]) #co-chat-suggestions {text-shadow:inherit}
+  body:is([data-co-environment=office],[data-co-environment=campus]) #co-observation-chat :is(button,label,textarea,.co-chat-escape,.co-chat-suggestion-heading,.co-observation-message>span:first-child) {
+    color:#fff;text-shadow:inherit;
+  }
+  body:is([data-co-environment=office],[data-co-environment=campus]) #co-observation-input::placeholder {color:#ffffffcf}
+  body:is([data-co-environment=office],[data-co-environment=campus]) #co-chat-suggestion-list button {background:#ffffff10;border-color:#ffffff38}
+  body:is([data-co-environment=office],[data-co-environment=campus]) #co-chat-suggestion-list button:hover {background:#ffffff26;border-color:#ffffff70}
+}
 /* Positioning must not re-enable controls hidden by intro or first-person mode. */
 body[data-building-phase=intro] :is(#co-scene-nav,#collaboration-open),
 body.first-person-locked :is(#co-scene-nav,#collaboration-open) {display:none!important}
@@ -324,3 +365,60 @@ body[data-co-environment=office][data-building-phase=interior] #building-floor-s
 }
 body.menus-hidden #co-interior-toggle,body.first-person-locked #co-interior-toggle,
 body[data-exploration=true] #co-interior-toggle {display:none!important}
+
+/* Desktop interiors use the full height below one shared toolbar row. */
+@media(min-width:1101px) {
+  body[data-co-environment=office][data-building-phase=interior] {--ob-card-top:84px;--ob-tools-top:24px;--ob-index:264px}
+  body[data-co-environment=office][data-building-phase=interior] .stage-toolbar {right:calc(var(--ob-edge) + 270px)}
+}
+@media(min-width:761px) {
+  body[data-co-environment=office][data-building-phase=interior] #building-action-dock {gap:8px}
+  #co-interior-controls {padding:10px}
+  #co-interior-controls .playback-bar {gap:5px 6px}
+  #co-interior-controls .play-button {height:30px}
+  #co-interior-controls #reset-button {height:28px}
+  #co-interior-controls .playback-time b {font-size:16px}
+  #co-interior-controls .speed-tabs button {min-height:23px;padding:3px 5px}
+  #co-interior-controls .stage-bottom {margin-top:7px;padding-top:7px}
+  #co-interior-controls .stage-bottom .layer-pills {grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  #co-interior-controls .layer-pills label {min-height:25px;padding:4px;font-size:9px}
+  #co-interior-controls .layer-pills input {width:10px;height:10px;margin-right:3px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar {padding:14px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar h2 {font-size:17px;margin:6px 0}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar .focus-metrics {margin-top:11px;padding-top:10px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar .focus-metrics b {font-size:22px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-building-bar {margin-top:12px;padding-top:10px;gap:6px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-building-back {margin-top:2px;padding:8px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar .focus-avatar-color {margin-top:10px;padding-top:9px}
+  body[data-co-environment=office][data-building-phase=interior] #building-action-dock>button {height:34px;min-height:34px}
+
+  /* Keep each section visible; the growing people and event lists scroll locally. */
+  body[data-co-environment=office][data-building-phase=interior] .results-panel {padding:14px;gap:0}
+  body[data-co-environment=office][data-building-phase=interior] .results-panel .section-heading {margin-bottom:9px;flex:none}
+  body[data-co-environment=office][data-building-phase=interior] .results-panel .result-section {padding:11px 0}
+  body[data-co-environment=office][data-building-phase=interior] #society-activity-panel {display:flex;flex-direction:column;flex:1 1 auto;min-height:340px;padding-top:0}
+  body[data-co-environment=office][data-building-phase=interior] #society-narrative {flex:none;font-size:10px;line-height:1.7;margin-bottom:10px}
+  body[data-co-environment=office][data-building-phase=interior] #society-activity-metrics {flex:none;gap:9px 12px;margin-bottom:12px}
+  body[data-co-environment=office][data-building-phase=interior] #society-activity-metrics b {font-size:20px}
+  body[data-co-environment=office][data-building-phase=interior] #society-activity-metrics small {font-size:8px;margin-top:3px}
+  body[data-co-environment=office][data-building-phase=interior] #society-people-list {flex:1 1 auto;min-height:50px;max-height:none;overflow:auto;scrollbar-width:thin}
+  body[data-co-environment=office][data-building-phase=interior] .society-person {padding:8px 0}
+  body[data-co-environment=office][data-building-phase=interior] .society-person>span {margin-top:4px}
+  body[data-co-environment=office][data-building-phase=interior] #crowd-heat-panel {flex:none;padding:11px 0}
+  body[data-co-environment=office][data-building-phase=interior] #crowd-heat-panel .analysis-pair {margin-top:10px}
+  body[data-co-environment=office][data-building-phase=interior] #crowd-heat-panel .hint {margin-top:8px;line-height:1.6}
+  body[data-co-environment=office][data-building-phase=interior] .results-panel .event-section {display:flex!important;flex-direction:column;flex:0 1 170px;min-height:90px;padding-bottom:0}
+  body[data-co-environment=office][data-building-phase=interior] #event-list {min-height:0;max-height:none;overflow:auto;scrollbar-width:thin}
+}
+@media(min-width:761px) and (max-height:850px) {
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar {padding:10px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar h2 {font-size:15px;margin:4px 0}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar p {font-size:10px;line-height:1.5}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar .focus-metrics {margin-top:8px;padding-top:8px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar .focus-metrics span {gap:4px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar .focus-metrics b {font-size:19px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-building-bar {margin-top:8px;padding-top:8px;gap:4px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-building-back {padding:6px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar .focus-avatar-color {margin-top:6px;padding-top:6px}
+  body[data-co-environment=office][data-building-phase=interior] .results-panel .event-section {flex-basis:100px}
+}

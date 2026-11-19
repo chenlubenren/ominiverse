@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ominispace · 空间全宇宙</title>
-  <link rel="preload" href="assets/characters/clay-male.glb" as="fetch" crossorigin="anonymous">
-  <link rel="preload" href="assets/characters/clay-female.glb" as="fetch" crossorigin="anonymous">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23258e82'/%3E%3Ctext x='8' y='25' font-family='sans-serif' font-size='28' fill='white'%3Ea%3C/text%3E%3C/svg%3E">
+  <link rel="preload" href="assets/characters/clay-male.89afa8f74f42.glb" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="assets/characters/clay-female.f618efe74321.glb" as="fetch" crossorigin="anonymous">
+  <meta name="theme-color" content="#f4f9ff">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/ominispace-icon-64.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/ominispace-icon-180.png">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="digital-twin.css">
   <link rel="stylesheet" href="building.css">
@@ -25,9 +27,26 @@
   <link rel="stylesheet" href="js/collaboration/station-short-matrix.css">
   <link rel="stylesheet" href="js/collaboration/station-story-labels.css">
   <link rel="stylesheet" href="js/collaboration/observation-layout.css">
+  <link rel="stylesheet" href="boot.css">
 </head>
 <body data-building-phase="intro" data-building-ready="false">
-  <div id="building-boot" role="status"><span class="boot-mark">a</span><b>SPATIAL SIMULATION</b><small>正在准备办公楼与 Agent 的日常…</small></div>
+  <section id="building-boot" aria-label="Ominispace 正在准备">
+    <div class="boot-composition">
+      <div class="boot-emblem" aria-hidden="true"><span class="boot-orbit"></span><img class="boot-symbol" src="assets/ominispace-icon-180.png" width="88" height="88" alt=""></div>
+      <span class="boot-eyebrow">A SPACE FOR EVERY POSSIBILITY</span>
+      <b class="boot-wordmark">Ominispace</b>
+      <p class="boot-tagline">空间里的日常，即将展开。</p>
+      <div class="boot-state" role="status" aria-live="polite" aria-atomic="true"><p id="boot-status">正在准备空间</p><p id="boot-detail">办公楼和空间站，正在一起准备。</p></div>
+      <div class="boot-progress"><div class="boot-progress-heading"><span>正在加载<span class="boot-loading-dots" aria-hidden="true">···</span><small>预计准备进度</small></span><b id="boot-progress-percent">0%</b></div><div id="boot-progress-track" class="boot-progress-track" role="progressbar" aria-label="预计准备进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="正在准备空间，预计准备进度 0%"><span id="boot-progress-fill" class="boot-progress-fill" aria-hidden="true"></span></div></div>
+      <ol class="boot-steps" aria-label="准备阶段" aria-busy="true"><li aria-current="step" data-boot-state="current"><i aria-hidden="true"></i><span>展开空间</span></li><li data-boot-state="pending"><i aria-hidden="true"></i><span>迎接人物</span></li><li data-boot-state="pending"><i aria-hidden="true"></i><span>空间站</span></li><li data-boot-state="pending"><i aria-hidden="true"></i><span>点亮场景</span></li></ol>
+      <section class="boot-tip" aria-label="玩法指南"><div class="boot-tip-visual"><img id="boot-tip-image" src="assets/loading-tips/story.webp" width="960" height="540" alt="聊天框发送火灾指令，办公楼内出现火势与疏散反应" decoding="async" fetchpriority="low"><span class="boot-tip-label">玩法指南</span><span id="boot-tip-index" aria-hidden="true">01 · 06</span><button id="boot-tip-previous" class="boot-tip-arrow" type="button" disabled aria-label="上一个玩法" aria-controls="boot-tip-image boot-tip-title boot-tip-text"><span aria-hidden="true">‹</span></button><button id="boot-tip-next" class="boot-tip-arrow" type="button" disabled aria-label="下一个玩法" aria-controls="boot-tip-image boot-tip-title boot-tip-text"><span aria-hidden="true">›</span></button></div><div class="boot-tip-copy"><h2 id="boot-tip-title">发消息，让故事发生</h2><p id="boot-tip-text">在底部发消息：“12层发生火灾”，按 Enter 发送。<br>观察火势与人员反应，为空间增加新的故事。</p></div><span id="boot-tip-status" class="boot-tip-live" role="status" aria-live="polite" aria-atomic="true"></span></section>
+      <div class="boot-wait"><span id="boot-wait-note">首次准备包含办公楼与空间站</span><span id="boot-elapsed" aria-hidden="true">00:00</span></div>
+      <button id="boot-retry" type="button" hidden>重新载入</button>
+      <noscript><p class="boot-noscript">请开启浏览器的 JavaScript 后重新载入。</p></noscript>
+    </div>
+    <span class="boot-footnote">人 · 空间 · 具身智能</span>
+  </section>
+  <script src="js/boot-progress.js"></script>
   <header class="app-header">
     <a class="brand" href="/" aria-label="空间模拟首页"><span class="brand-mark">◈</span><div><b>SPATIAL SIMULATION</b><small>办公楼日常 · 人群观察与跨层推演</small></div></a>
     <nav class="main-nav" aria-label="工作模式"><button data-mode="overview" class="active">空间总览<small>SPACE OVERVIEW</small></button><button data-mode="agents">行为模拟<small>AGENT SIMULATION</small></button><button data-mode="analysis">通行热力<small>ACCESS ANALYSIS</small></button><button data-mode="events">事件回溯<small>EVENT INSIGHTS</small></button></nav>
@@ -161,6 +180,7 @@
   <script src="js/vendor/three-r128/build/three.min.js"></script>
   <script src="js/vendor/three-r128/controls/OrbitControls.js"></script>
   <script src="js/vendor/postprocessing/Pass.js"></script><script src="js/vendor/postprocessing/CopyShader.js"></script><script src="js/vendor/postprocessing/ShaderPass.js"></script><script src="js/vendor/postprocessing/EffectComposer.js"></script><script src="js/vendor/postprocessing/SimplexNoise.js"></script><script src="js/vendor/postprocessing/SSAOShader.js"></script><script src="js/vendor/postprocessing/SSAOPass.js"></script><script src="js/vendor/postprocessing/GammaCorrectionShader.js"></script><script src="js/vendor/postprocessing/FXAAShader.js"></script>
+  <script src="js/vendor/meshoptimizer/meshopt_decoder.js"></script>
   <script src="js/vendor/three-r128/loaders/GLTFLoader.js"></script>
       <script src="js/core.js"></script><script src="js/ui-text.js"></script><script src="js/themes.js"></script><script src="js/geometry.js"></script><script src="js/anatomical-hand.js"></script><script src="js/anatomy-ik.js"></script><script src="js/locomotion.js"></script><script src="js/native-leg-rig.js"></script><script src="js/white-avatar-style.js"></script><script src="js/avatars.js"></script><script src="js/render-styles.js"></script><script src="js/archviz-reflection.js"></script><script src="js/archviz-surfaces.js"></script><script src="js/rendering.js"></script><script src="js/scene.js"></script><script src="js/immersive-lighting.js"></script><script src="js/crowd-observation.js"></script><script src="js/office-overlays.js"></script><script src="js/furniture-library.js"></script><script src="js/furniture-assets.js"></script><script src="js/office-kit.js"></script><script src="js/matrix-genome.js"></script><script src="js/flexible-floor-plan.js"></script><script src="js/tower-floor.js"></script><script src="js/fire-core.js"></script><script src="js/earthquake-core.js"></script><script src="js/disaster.js"></script><script src="js/agent-states.js"></script><script src="js/crowd-activity.js"></script><script src="js/office-crowd-space.js"></script><script src="js/office-society.js"></script><script src="js/app.js"></script><script src="js/site-crowd.js"></script><script src="js/first-person.js"></script><script src="js/tower-journey.js"></script><script src="js/tower-world.js"></script><script src="js/continuous-tower.js"></script><script src="js/tower-airborne.js"></script><script src="js/zombie-society.js"></script><script src="js/civilian-reactions.js"></script><script src="js/air-particles.js"></script><script src="js/office-respiratory.js"></script><script src="js/office-respiratory-demo.js"></script><script src="js/office-ventilation.js"></script><script src="js/office-quake-physics.js"></script><script src="js/office-emergency.js"></script><script src="js/hand-rig.js"></script><script src="js/destruction-materials.js"></script><script src="js/boxing-motion.js"></script><script src="js/boxing-gloves.js"></script><script src="js/robot-hands.js"></script><script src="js/combat.js"></script><script src="js/fracture-cells.js"></script><script src="js/destruction-vfx.js"></script><script src="js/rigid-fragment-batch.js"></script><script src="js/wall-damage.js"></script><script src="js/rapier-destruction.js"></script><script src="js/character-motion.js"></script><script src="js/player-hand-assets.js"></script><script src="js/character-lod.js"></script><script src="js/character-mouth.js"></script><script src="js/character-gore.js"></script><script src="js/character-assets.js"></script><script src="js/parametric-envelope.js"></script><script src="js/matrix-evolution.js"></script><script src="js/building-focus.js"></script><script src="js/campus-landscape.js"></script><script src="js/building.js"></script>
   <script src="js/collaboration/station-event-kit.js"></script>

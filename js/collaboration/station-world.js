@@ -2,6 +2,22 @@
 (() => {
   'use strict';const C=window.CoScene,T=THREE,$=id=>document.getElementById(id),base=new URL('../../assets/station/',document.currentScript.src);
   const ease=t=>t*t*t*(t*(t*6-15)+10);
+  // r128 raycasting reads integer positions without the GPU's normalization.
+  // Decode once after loading so picking and bounds match the rendered hull.
+  function normalizeStationPickingGeometry(root){
+    const seen=new Set(),limits={Uint8Array:255,Uint8ClampedArray:255,Uint16Array:65535,Uint32Array:4294967295,Int8Array:127,Int16Array:32767,Int32Array:2147483647};
+    root.traverse(mesh=>{
+      const geometry=mesh.geometry;if(!mesh.isMesh||!geometry||seen.has(geometry))return;seen.add(geometry);
+      const position=geometry.getAttribute('position');if(!position?.normalized)return;
+      const array=position.isInterleavedBufferAttribute?position.data.array:position.array,max=limits[array.constructor.name];if(!max)return;
+      const stride=position.isInterleavedBufferAttribute?position.data.stride:position.itemSize,offset=position.isInterleavedBufferAttribute?position.offset:0,values=new Float32Array(position.count*position.itemSize);
+      for(let i=0;i<position.count;i++)for(let j=0;j<position.itemSize;j++)values[i*position.itemSize+j]=Math.max(array[i*stride+offset+j]/max,-1);
+      const decoded=new T.BufferAttribute(values,position.itemSize);decoded.name=position.name;decoded.setUsage(position.usage??position.data?.usage??T.StaticDrawUsage);
+      geometry.setAttribute('position',decoded);geometry.computeBoundingBox();geometry.computeBoundingSphere();
+    });
+  }
+  C.normalizeStationPickingGeometry=normalizeStationPickingGeometry;
+  const stationAssets={exterior:{url:'tiangong-exterior.66ddca6afe0d.glb',bytes:12667816},props:{'cargo-bag':{url:'props/cargo-bag/interior.b4ea3c0c3e27.glb',bytes:537672},'lab-instrument':{url:'props/lab-instrument/interior.2bbbef1d169f.glb',bytes:1483284},'eva-suit':{url:'props/eva-suit/interior.3e5bcb02188e.glb',bytes:431080}}};
   class StationExperience {
     constructor(owner){
       this.o=owner;this.v=owner.v;this.selected='tianhe';this.phase='overview';this.rooms=new Map();this.modules=new Map();this.scene=new T.Scene();this.scene.background=new T.Color('#050c16').convertSRGBToLinear();this.root=new T.Group();this.scene.add(this.root);this.exterior=new T.Group();this.root.add(this.exterior);this.environment=new T.Group();this.root.add(this.environment);this.scene.environment=this.v.scene.environment;this.elapsed=0;this.exploded=false;this.lightMode='day';this.serial=0;this.crewManifest=C.stationCrewManifest||{tianhe:2,habitat:1,node:1,wentian:1,mengtian:0,tianzhou:0,shenzhou:0,airlock:0};C.stationCrewManifest=this.crewManifest;this.crewRoster=[['crew-01','林岚','tianhe'],['crew-02','陈亦','tianhe'],['crew-03','周宁','habitat'],['crew-04','许知','node'],['crew-05','江月','wentian']].map(([id,name,cabin],globalIndex)=>({id,name,cabin,globalIndex}));this.traffic=C.StationTraffic?new C.StationTraffic(this):null;
@@ -20,21 +36,50 @@
       this.composer.addPass(this.ao);this.composer.addPass(new T.ShaderPass(T.GammaCorrectionShader));
       window.IndoorLab.cacheStaticAO(this.ao,()=>{v.camera.updateMatrixWorld();return this.selected+':'+this.room.roof.visible+':'+v.camera.matrixWorld.elements.map(x=>x.toFixed(5)).join(',')+':'+v.camera.projectionMatrix.elements.join(',')+':'+this.room.hatches.map(h=>h.leaf.position.x.toFixed(2)).join(',');});
     }
-    async prepare(){
-      if(this.prepared)return;const progress=$('co-scene-transition');progress.textContent='正在读取天宫精细模型…';
-      const props=new Map(),[gltf]=await Promise.all([
-        new T.GLTFLoader().loadAsync(new URL('tiangong-exterior.glb',base).href,event=>{if(event.total)progress.textContent='正在读取天宫精细模型 · '+Math.round(event.loaded/event.total*100)+'%';}),
-        window.IndoorLab.characterAssets?.ensureCrew(),
-        ...['cargo-bag','lab-instrument','eva-suit'].map(async name=>{const prop=await new T.GLTFLoader().loadAsync(new URL('props/'+name+'/interior.glb',base).href);props.set(name,prop.scene);})
-      ]);
-      this.exterior.add(gltf.scene);
-      for(const group of gltf.scene.children){const id=group.userData.moduleId||group.name,spec=C.stationModule(id);if(!spec)continue;group.userData.moduleId=id;this.modules.set(id,group);group.traverse(mesh=>{if(!mesh.isMesh)return;mesh.userData.moduleId=id;mesh.material=mesh.material.clone();mesh.material.envMapIntensity=.28;mesh.castShadow=mesh.userData.layerIndex===0;mesh.userData.stationShadow=mesh.castShadow;mesh.receiveShadow=true;mesh.material.side=T.FrontSide;mesh.userData.baseColor=mesh.material.color.clone();});}
-      C.stationProps=props;
-      this.createExtractionGuide();this.morphology=new C.StationMorphology(this);this.shellStudy=new C.StationShellStudy(this);this.shellCabins=new C.StationShellCabins(this);this.prepared=true;
+    prepare(onProgress){
+      if(this.prepared){onProgress?.(.92,'空间站模型已就绪');return Promise.resolve();}
+      this.prepareListeners??=new Set();if(onProgress)this.prepareListeners.add(onProgress);
+      if(this.preparing){if(this.prepareProgress)onProgress?.(...this.prepareProgress);return this.preparing;}
+      this.preparedAssets??=new Map();const token=this.prepareToken=(this.prepareToken||0)+1,controller=new AbortController(),signal=controller.signal,loaded=new Map(),crewBytes=4053336,textureBytes=2420036,earthBytes=512606;
+      const resources=[['exterior',stationAssets.exterior],...Object.entries(stationAssets.props)],total=resources.reduce((sum,[,asset])=>sum+asset.bytes,crewBytes+textureBytes+earthBytes);let crewDone=false,texturesDone=false,earthDone=false;
+      const emit=(fraction,text)=>{if(signal.aborted||token!==this.prepareToken)return;this.prepareProgress=[fraction,text];for(const callback of this.prepareListeners)callback(fraction,text);};
+      const report=()=>{const bytes=[...loaded.values()].reduce((a,b)=>a+b,0)+(crewDone?crewBytes:0)+(texturesDone?textureBytes:0)+(earthDone?earthBytes:0),pending=resources.filter(([name,asset])=>(loaded.get(name)||0)<asset.bytes).map(([name])=>name);const text=pending.includes('exterior')?'正在下载空间站外观与舱内设备…':pending.length?'正在准备舱内设备…':!crewDone?'正在准备空间站乘员…':!texturesDone||!earthDone?'正在准备舱内材质与地球背景…':'正在解析空间站模型…';emit(.04+.84*Math.min(1,bytes/total),text);};
+      const load=async(name,asset)=>{
+        const url=new URL(asset.url,base).href;if(this.preparedAssets.has(url)){loaded.set(name,asset.bytes);report();return this.preparedAssets.get(url);}
+        const response=await fetch(url,{signal});if(!response.ok)throw Error('空间站模型下载失败（'+response.status+'），请重新尝试。');
+        let data;
+        if(response.body?.getReader){const reader=response.body.getReader(),chunks=[];let count=0;while(true){const {done,value}=await reader.read();if(done)break;chunks.push(value);count+=value.length;loaded.set(name,Math.min(asset.bytes*.98,count));report();}const buffer=new Uint8Array(count);let offset=0;for(const chunk of chunks){buffer.set(chunk,offset);offset+=chunk.length;}data=buffer.buffer;}
+        else data=await response.arrayBuffer();
+        if(signal.aborted)throw Error('空间站准备已中止，请重新尝试。');
+        const loader=new T.GLTFLoader();if(window.MeshoptDecoder)loader.setMeshoptDecoder(window.MeshoptDecoder);
+        const gltf=await new Promise((resolve,reject)=>loader.parse(data,new URL('.',url).href,resolve,reject));this.preparedAssets.set(url,gltf);loaded.set(name,asset.bytes);report();return gltf;
+      };
+      let timeout;const deadline=new Promise((_,reject)=>{timeout=setTimeout(()=>{controller.abort();reject(Error('空间站下载等待较久，请检查网络后重新尝试。'));},120000);});
+      this.preparing=Promise.race([(async()=>{
+        report();const props=new Map(),[gltf]=await Promise.all([
+          load('exterior',stationAssets.exterior),
+          (async()=>{const assets=window.IndoorLab.characterAssets;if(assets?.ensureCrew&&await assets.ensureCrew()===false)throw Error('空间站乘员未能下载完成，请重新尝试。');crewDone=true;report();})(),
+          (async()=>{await C.prepareStationTextures();texturesDone=true;report();})(),
+          (async()=>{await this.prepareEarthTexture();earthDone=true;report();})(),
+          ...Object.entries(stationAssets.props).map(async([name,asset])=>props.set(name,(await load(name,asset)).scene))
+        ]);
+        if(signal.aborted||token!==this.prepareToken)throw Error('空间站准备已中止，请重新尝试。');
+        emit(.90,'模型已下载，正在整理空间站舱段…');
+        // Attach only a complete resource set. Failed retries keep successful
+        // parsed assets without duplicating the station or building partial cabins.
+        if(!this.exteriorPrepared){
+          normalizeStationPickingGeometry(gltf.scene);
+          for(const group of gltf.scene.children){const id=group.userData.moduleId||group.name,spec=C.stationModule(id);if(!spec)continue;group.userData.moduleId=id;this.modules.set(id,group);group.traverse(mesh=>{if(!mesh.isMesh)return;mesh.userData.moduleId=id;mesh.material=mesh.material.clone();mesh.material.envMapIntensity=.28;mesh.castShadow=mesh.userData.layerIndex===0;mesh.userData.stationShadow=mesh.castShadow;mesh.receiveShadow=true;mesh.material.side=T.FrontSide;mesh.userData.baseColor=mesh.material.color.clone();});}
+          this.exterior.add(gltf.scene);this.exteriorPrepared=true;
+        }
+        C.stationProps=props;if(!this.guide)this.createExtractionGuide();this.morphology??=new C.StationMorphology(this);this.shellStudy??=new C.StationShellStudy(this);this.shellCabins??=new C.StationShellCabins(this);
+        this.initializeContexts();for(const room of this.rooms.values())room.root.visible=false;this.prepared=true;emit(.92,'空间站模型已就绪');
+      })(),deadline]).catch(error=>{controller.abort();if(error?.name==='AbortError'||error instanceof TypeError)throw Error('空间站下载连接中断，请检查网络后重新尝试。');throw error;}).finally(()=>{clearTimeout(timeout);if(token===this.prepareToken){this.preparing=null;this.prepareListeners.clear();}});
+      return this.preparing;
     }
     warmTravel(){
       if(this.travelWarmed)return;
-      const renderer=this.v.renderer,previousTarget=renderer.getRenderTarget(),exposure=renderer.toneMappingExposure,autoClear=renderer.autoClear,target=new T.WebGLRenderTarget(16,16),camera=new T.PerspectiveCamera(48,1.5,.05,2000),materials=new Map(),meshes=[];
+      const renderer=this.v.renderer,previousTarget=renderer.getRenderTarget(),exposure=renderer.toneMappingExposure,autoClear=renderer.autoClear,shadowUpdate=renderer.shadowMap.needsUpdate,target=new T.WebGLRenderTarget(16,16),camera=new T.PerspectiveCamera(48,1.5,.05,2000),materials=new Map(),meshes=[];
       target.texture.encoding=renderer.outputEncoding;camera.position.set(64,44,73);camera.lookAt(0,0,-4);
       this.exterior.traverse(mesh=>{if(!mesh.isMesh)return;meshes.push([mesh,mesh.castShadow]);if(!materials.has(mesh.material))materials.set(mesh.material,{opacity:mesh.material.opacity,transparent:mesh.material.transparent,depthWrite:mesh.material.depthWrite});});
       try{
@@ -44,16 +89,19 @@
         renderer.render(this.scene,camera);this.travelWarmed=true;
       }finally{
         for(const [material,state]of materials){Object.assign(material,state);material.needsUpdate=true;}for(const [mesh,castShadow]of meshes)mesh.castShadow=castShadow;
-        renderer.setRenderTarget(previousTarget);renderer.toneMappingExposure=exposure;renderer.autoClear=autoClear;target.dispose();
+        renderer.setRenderTarget(previousTarget);renderer.toneMappingExposure=exposure;renderer.autoClear=autoClear;renderer.shadowMap.needsUpdate=shadowUpdate;target.dispose();
       }
     }
     createSpace(){
       let seed=741;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
       const positions=[],colors=[];for(let i=0;i<2100;i++){const theta=random()*Math.PI*2,u=random()*2-1,r=300+random()*350,s=Math.sqrt(1-u*u);positions.push(r*s*Math.cos(theta),r*u,r*s*Math.sin(theta));const b=.5+random()*.5;colors.push(b*.85,b*.93,b);}
       const stars=new T.BufferGeometry();stars.setAttribute('position',new T.Float32BufferAttribute(positions,3));stars.setAttribute('color',new T.Float32BufferAttribute(colors,3));this.starColors=new T.Float32BufferAttribute(colors,3);stars.setAttribute('color',this.starColors);this.starBase=colors.slice();this.environment.add(new T.Points(stars,new T.PointsMaterial({vertexColors:true,size:.45,sizeAttenuation:true,depthWrite:false,toneMapped:false})));
-      const earthMap=new T.TextureLoader().load(new URL('earth-day.jpg',base).href,()=>{},undefined,()=>{this.earth.material.map=null;this.earth.material.color.set('#164a77');this.earth.material.needsUpdate=true;});earthMap.encoding=T.sRGBEncoding;earthMap.anisotropy=4;
-      this.earth=new T.Mesh(new T.SphereGeometry(105,96,64),new T.MeshStandardMaterial({map:earthMap,color:'#b8d8ef',roughness:1,metalness:0}));this.earth.position.set(55,-140,-150);this.earth.rotation.set(.22,2.2,-.16);this.environment.add(this.earth);
+      this.earth=new T.Mesh(new T.SphereGeometry(105,96,64),new T.MeshStandardMaterial({color:'#b8d8ef',roughness:1,metalness:0}));this.earth.position.set(55,-140,-150);this.earth.rotation.set(.22,2.2,-.16);this.environment.add(this.earth);this.prepareEarthTexture().catch(()=>{});
       const atmosphere=new T.Mesh(new T.SphereGeometry(108,64,48),new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.BackSide,blending:T.AdditiveBlending,uniforms:{glow:{value:new T.Color('#3e9ce0')}},vertexShader:'varying vec3 n;varying vec3 v;void main(){vec4 p=modelViewMatrix*vec4(position,1.0);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n;varying vec3 v;uniform vec3 glow;void main(){float a=pow(1.0-abs(dot(normalize(n),normalize(v))),3.5);gl_FragColor=vec4(glow,a*.48);}'}));atmosphere.position.copy(this.earth.position);this.environment.add(atmosphere);
+    }
+    prepareEarthTexture(){
+      if(this.earthTextureReady)return Promise.resolve();if(this.earthTexturePromise)return this.earthTexturePromise;
+      this.earthTexturePromise=new Promise((resolve,reject)=>{const texture=new T.TextureLoader().load(new URL('earth-day.jpg',base).href,()=>{this.earthTextureReady=true;resolve();},undefined,()=>reject(Error('地球背景未能下载完成，请重新尝试。')));texture.encoding=T.sRGBEncoding;texture.anisotropy=4;const previous=this.earth.material.map;this.earth.material.map=texture;this.earth.material.needsUpdate=true;previous?.dispose();}).finally(()=>{this.earthTexturePromise=null;});return this.earthTexturePromise;
     }
     createUI(){
       this.ui=document.createElement('section');this.ui.id='station-ui';this.ui.hidden=true;this.ui.setAttribute('aria-label','天宫空间站探索');this.ui.innerHTML=`
@@ -69,7 +117,7 @@
       <div class="st-bottom"><div class="st-view-bar"><div id="st-help" hidden></div></div><nav class="st-modules" aria-label="空间站舱段"><div class="st-index-title"><span>舱段索引<small>MODULE INDEX</small></span><b>08</b></div><div class="st-module-list">${C.stationModules.map(m=>`<button data-st-module="${m.id}" aria-label="${m.index} ${m.name}" aria-pressed="false" style="--cabin-color:${m.color}"><i class="st-module-icon" aria-hidden="true"></i><b>${m.index}</b><span class="st-module-copy"><strong>${m.name}</strong><small>${m.english.split(' / ')[0]}</small></span><em aria-hidden="true"></em></button>`).join('')}</div><p class="st-index-help">单击抽出 · 再次点击进入<br>保留整站关系，观察舱内日常</p></nav><div class="st-foot"><span>PEOPLE · ORBITS · CONNECTIONS</span><span id="st-status">八个独立空间 · 轨道上的共同日常</span></div></div>
       <div id="st-touch-move" hidden aria-label="失重移动控制"><button data-st-move="w" aria-label="向前">↑</button><button data-st-move="a" aria-label="向左">←</button><button data-st-move="s" aria-label="向后">↓</button><button data-st-move="d" aria-label="向右">→</button><button data-st-move=" " aria-label="上浮">上浮</button><button data-st-move="c" aria-label="下沉">下沉</button></div><div id="st-hatch-prompt" hidden><span id="st-hatch-text"></span><button id="st-hatch-use">E · 开启舱门</button></div><div id="st-transfer" hidden role="status">正在通过舱门…</div>`;
       document.body.appendChild(this.ui);
-      $('st-return').onclick=()=>this.phase==='interior'?this.returnToSelection():this.overview();$('st-enter').onclick=()=>this.enter(this.selected);$('st-reset').onclick=()=>this.cameraMode(this.phase==='interior'?'detail':'perspective');$('st-explode').onclick=()=>{if(this.shellStudy?.changed||this.morphBusy)return;this.exploded=!this.exploded;this.syncUI();};$('st-cutview').onclick=()=>this.cameraMode('detail');$('st-top').onclick=()=>this.cameraMode('top');$('st-walk').onclick=()=>this.cameraMode('walk');$('st-partners').onclick=()=>this.o.openPanel();$('st-hatch-use').onclick=()=>this.interact();
+      $('st-return').onclick=()=>this.phase==='interior'?this.returnToSelection():this.overview();$('st-enter').onclick=()=>this.enter(this.selected);$('st-reset').onclick=()=>this.cameraMode(this.phase==='interior'?'detail':'perspective');$('st-explode').onclick=()=>{if(this.shellStudy?.changed||this.morphBusy)return;this.exploded=!this.exploded;this.syncUI();};$('st-cutview').onclick=()=>this.cameraMode('detail');$('st-top').onclick=()=>this.cameraMode('top');$('st-walk').onclick=()=>this.cameraMode('walk');$('st-partners').onclick=()=>this.o.openRobotLibrary();$('st-hatch-use').onclick=()=>this.interact();
       $('st-random-shape').onclick=()=>this.toggleMorphology();$('st-restore-shape').onclick=()=>this.restoreMorphology();
       this.ui.querySelectorAll('[data-st-module]').forEach(button=>button.onclick=()=>{if(this.phase==='interior')this.enter(button.dataset.stModule);else this.select(button.dataset.stModule);});
       this.ui.querySelectorAll('[data-st-move]').forEach(b=>{b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);this.v.walkKeys.add(b.dataset.stMove);};for(const type of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(type,()=>this.v.walkKeys.delete(b.dataset.stMove));});
@@ -209,7 +257,8 @@
     }
     contextFor(id){
       const key='station-'+id,existing=this.o.contexts.get(key);if(existing)return this.prepareContext(id,existing);
-      const selected=this.selected;this.selected=id;let ctx;try{ctx=this.o.currentContext();this.prepareContext(id,ctx);}finally{this.selected=selected;}return ctx;
+      const world=this.getRoom(id);world.displayName='空间站 · '+world.spec.name;world.root.visible=false;
+      const ctx={key,world,sim:new C.Simulation(world)};ctx.sim.group.userData.noAO=true;ctx.sim.routes.userData.noAO=true;ctx.sim.onEvent=event=>this.o.chat?.event(event);this.o.contexts.set(key,ctx);return this.prepareContext(id,ctx);
     }
     initializeContexts(){
       for(const module of C.stationModules)this.contextFor(module.id);

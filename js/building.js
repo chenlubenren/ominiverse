@@ -38,7 +38,9 @@
         else if(assets.officeDownloadsStarted)this.floorFocus.warmInteriorLighting({final:false});
         if(this.phase==='interior'&&!this.floorFocus?.interior)originalRender();
         else{if(this.floorFocus?.interior){this.view.updateRescueVisual();this.view.disasterRenderer?.update();this.view.agentBubbles?.update(this.view.currentAgents);}this.renderBuilding();}
-        if(this.floorFocus.lightingWarmed&&document.body.dataset.buildingReady!=='true')document.body.dataset.buildingReady='true';
+        // The welcome screen covers both destinations: entering the app must
+        // not defer the station's first model download to the scene button.
+        if(this.floorFocus.lightingWarmed){document.body.dataset.officeReady='true';if(L.stationStartup?.ready&&document.body.dataset.buildingReady!=='true')document.body.dataset.buildingReady='true';}
       };
       this.view.renderer.domElement.addEventListener('pointerdown',e=>{this.pointer={x:e.clientX,y:e.clientY};});
       this.view.renderer.domElement.addEventListener('click',e=>{
@@ -70,7 +72,7 @@
     }
 
     updateSocietyVisuals(now,{people=true}={}){
-      if(this.matrixLab?.active||this.matrixLab?.busy){this.societyPeople.visible=false;this.liftVisuals.forEach(o=>o.visible=false);return;}const society=this.society,interior=this.phase==='interior';this.societyPeople.visible=people&&(!interior||!!this.floorFocus?.interior);
+      if(this.matrixLab?.active||this.matrixLab?.busy){this.societyPeople.visible=false;this.liftVisuals.forEach(o=>o.visible=false);return;}const society=this.society,interior=this.phase==='interior';this.societyPeople.visible=people&&this.world.visible&&(!interior||!!this.floorFocus?.interior);
       // Campus views keep the simulation and status live without preparing
       // character instances for the hidden population inside the tower.
       if(this.societyPeople.visible){const agents=[];for(const source of society.agents){const a=society.renderAgent(source);if(a.isPlayer||a.location==='escaped'||L.isOutdoorAgent(a)||L.disasterDirector?.physics?.destroyedFloors.has(Math.round(a.floor))||this.floorFocus?.interior&&Math.round(a.floor)===this.selected)continue;const f=Math.max(1,Math.min(30,a.floor)),lo=Math.floor(f),hi=Math.min(30,lo+1),u=f-lo,p=this.plates[lo-1].group.position,q=this.plates[hi-1].group.position;let y=(f-1)*(3.6+5.4*this.mix)+.82;if(a.location==='stairs'&&a.absoluteY!==undefined)y=a.absoluteY*(1+1.5*this.mix)+.82;agents.push({...a,x:a.x+p.x+(q.x-p.x)*u,z:a.z+p.z+(q.z-p.z)*u,baseY:y});}this.societyRenderer.update(agents,society.time+society.accumulator);}
@@ -300,7 +302,7 @@
       try{
         if(this.app.model.towerFloor!==n||this.app.model.hasTowerShell!==false)await this.app.loadTowerFloor(n,{shell:false});
         focus.restorePresentation(saved);$('demo-preset').value='building';this.loading=false;
-        focus.mountInterior();focus.showInteriorUI();focus.startBlend();this.app.play(true);
+        focus.mountInterior();focus.showInteriorUI();focus.startBlend(450);this.app.play(true);
       }catch(e){focus.restorePresentation(saved);focus.returnToOverview(false);console.error(e);$('toast').textContent='楼层加载失败：'+(L.brandNeutralText?.(e.message)??e.message);$('toast').hidden=false;}
       finally{this.loading=false;$('interior-floor-select').disabled=false;$('interior-floor-prev').disabled=n===1;$('interior-floor-next').disabled=n===30;}
     }
