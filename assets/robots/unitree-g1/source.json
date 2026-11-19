@@ -1,0 +1,9 @@
+{
+  "source": "https://github.com/unitreerobotics/unitree_ros",
+  "commit": "157ff950351e5f535e03c5d85a16b7d594b3dbcc",
+  "urdf": "robots/g1_description/g1_29dof.urdf",
+  "license": "BSD-3-Clause",
+  "visualMeshes": 36,
+  "actuatedJoints": 29,
+  "conversion": "Visual meshes and URDF joint hierarchy, original metres, Z up; no simplification."
+}

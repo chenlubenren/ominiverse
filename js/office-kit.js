@@ -1,0 +1,44 @@
+/* Shared office furniture and room recipes. Local +Z is the front of a chair. */
+(() => {
+  'use strict';const L=window.IndoorLab;
+  class OfficeKit {
+    constructor({box,variantSeed=0,seat=()=>{},feature=()=>{},label=()=>{}}){this.emit=box;this.variantSeed=variantSeed;this.addSeat=seat;this.addFeature=feature;this.label=label;this.frame={x:0,z:0,a:0};this.serial=0;this.room='';}
+    point(x,z){const f=this.frame;return{x:f.x+Math.cos(f.a)*x+Math.sin(f.a)*z,z:f.z-Math.sin(f.a)*x+Math.cos(f.a)*z};}
+    at(x,z,a,fn){const old=this.frame,assembly=this.assemblyId,p=this.point(x,z);this.assemblySerial=(this.assemblySerial||0)+1;this.assemblyId='furniture-'+this.assemblySerial;this.frame={...p,a:old.a+a};fn();this.frame=old;this.assemblyId=assembly;}
+    b(key,w,h,d,x,y,z,opts={}){const p=this.point(x,z);this.emit(key,w,h,d,p.x,y,p.z,{assemblyId:this.assemblyId,visualAsset:this.visualAsset,...opts,rotation:this.frame.a+(opts.rotation||0)});}
+    variant(choices){let hash=this.variantSeed;for(const ch of this.room)hash=(hash*31+ch.charCodeAt(0))>>>0;return choices[hash%choices.length];}
+    visual(kind,options,fn){const old=this.visualAsset;this.visualAsset={kind,x:this.frame.x,z:this.frame.z,angle:this.frame.a,assemblyId:this.assemblyId,...options};try{fn();}finally{this.visualAsset=old;}}
+    feature(kind,name,x,z,extra={}){const p=this.point(x,z);return this.addFeature({id:`${kind}-${++this.serial}`,kind,name,...p,room:this.room,...extra});}
+    chair(x,z,a=0,{kind='work',name='办公椅',target,keyboard=false,sofa=false}={}){
+      const p=this.point(x,z),angle=this.frame.a+a,id=`seat-${++this.serial}`,seat={id,...p,angle,kind,name,room:this.room,sofa,keyboard,approach:{x:p.x-Math.sin(angle)*.82,z:p.z-Math.cos(angle)*.82},target:target?this.point(target.x,target.z):undefined};this.addSeat(seat);
+      const style=kind==='training'?'guest-chair':kind==='meeting'?this.variant(['cantilever-chair','meeting-chair']):kind==='lounge'||sofa?this.variant(['visitor-chair','guest-chair']):this.variant(['office-chair','task-chair']);
+      this.at(x,z,a,()=>this.visual(style,{width:.60,height:1,depth:.59,seatId:id,name},()=>{const opt={seatId:id,name,kind:'chair'};
+        this.b(sofa?'fabric':'chair',.5,.10,.49,0,.48,0,opt);this.b(sofa?'fabric':'chair',.5,.50,.08,0,.77,-.23,opt);
+        if(!sofa){this.b('metal',.055,.34,.055,0,.28,0,opt);for(let j=0;j<5;j++){const q=j*Math.PI*.4;this.b('metal',.28,.035,.04,Math.sin(q)*.13,.11,Math.cos(q)*.13,{...opt,rotation:q});this.b('metal',.075,.075,.055,Math.sin(q)*.26,.06,Math.cos(q)*.26,{...opt,rotation:q});}for(const s of [-1,1]){this.b('metal',.035,.16,.035,s*.27,.6,0,opt);this.b('chair',.055,.05,.29,s*.27,.69,.015,opt);}}
+      }));return seat;
+    }
+    desk(x,z,a=0,{seat=true,name='电脑工位',width=1.5}={}){this.at(x,z,a,()=>this.visual('workstation',{width,height:1,depth:.76,name},()=>{
+      this.b('desk',width,.075,.76,0,.77,0,{name:'办公桌 · '+name});for(const s of [-1,1]){this.b('metal',.05,.72,.57,s*(width/2-.12),.37,0);this.b('metal',.26,.035,.65,s*(width/2-.12),.045,0);}
+      this.b('screen',.55,.34,.045,0,1.06,-.19,{name:'电脑显示器'});this.b('metal',.06,.20,.06,0,.89,-.19);this.b('metal',.30,.025,.18,0,.82,-.16);this.b('key',.43,.018,.16,0,.821,.235,{ignore:true,name:'键盘'});this.b('key',.055,.028,.085,.37,.83,.23,{ignore:true,name:'鼠标'});this.b('wood',.14,.05,.20,-width*.35,.82,.1,{ignore:true,name:'笔记本'});this.b('metal',.07,.11,.07,width*.37,.87,-.15,{ignore:true,name:'水杯'});
+      if(seat)this.chair(0,.70,Math.PI,{name:name+'座椅',keyboard:true,target:{x:0,z:.235}});
+    }));}
+    sofa(x,z,a=0,{width=2.5,kind='lounge'}={}){this.at(x,z,a,()=>this.visual(this.variant(['sofa','lounge-sofa']),{width,height:1,depth:.82,name:'会客沙发'},()=>{this.b('fabric',width,.35,.78,0,.27,0,{name:'沙发软包'});this.b('fabric',width,.54,.16,0,.62,-.36,{name:'沙发靠背'});for(const s of [-1,1])this.b('fabric',.13,.46,.8,s*(width/2-.05),.42,0,{name:'沙发扶手'});for(const sx of [-width*.25,width*.25]){this.b('fabric',width*.43,.10,.63,sx,.49,.04);const p=this.point(sx,.06),angle=this.frame.a;this.addSeat({id:`seat-${++this.serial}`,...p,angle,kind,room:this.room,name:'会客沙发',sofa:true,approach:this.point(sx,.91)});}}));}
+    table(x,z,{w=2.5,d=1.5,chairs=4,kind='meeting',a=0}={}){this.at(x,z,a,()=>this.visual('meeting-table',{width:w,height:1,depth:d,name:'会议桌'},()=>{this.b('desk',w,.10,d,0,.77,0,{name:kind==='meeting'?'会议桌':'协作项目桌'});this.b('metal',w*.38,.70,d*.45,0,.36,0);for(let i=0;i<Math.ceil(chairs/2);i++)for(const s of [-1,1]){const xx=(i-(Math.ceil(chairs/2)-1)/2)*Math.min(1.05,w/Math.ceil(chairs/2));if(i*2+(s>0?1:0)<chairs)this.chair(xx,s*(d/2+.57),s>0?Math.PI:0,{kind,name:kind==='meeting'?'会议座椅':'协作座椅',target:{x:xx,z:0}});}this.b('screen',.55,.045,.32,0,.85,0,{ignore:true,name:'会议控制平板'});this.b('wood',.3,.025,.24,-w*.3,.84,.1,{ignore:true,name:'会议文件'});}));}
+    storage(x,z,a=0,{w=2.2,h=1.25,open=false}={}){this.at(x,z,a,()=>this.visual(open?'bookcase':'office-cabinet',{width:w,height:h,depth:.42,name:'储物柜'},()=>{this.b('wood',w,h,.42,0,h/2,0,{name:open?'图书资料架':'储物柜'});for(let i=0;i<Math.max(2,Math.round(w/.55));i++){const xx=-w/2+.3+i*.55;this.b(open?'fabric':'metal',open?.08:.02,open?h*.55:.12,.035,xx,h*.6,.23,{ignore:true,name:open?'资料与书籍':'柜门把手'});}}));}
+    plant(x,z,size=.65){this.visual('plant',{...this.point(x,z),width:size*.82,height:1.27,depth:size*.82,name:'室内绿植'},()=>{this.b('desk',size*.7,.45,size*.7,x,.225,z,{name:'绿植盆器'});for(let j=0;j<3;j++)this.b('plant',size*(.58+j*.08),.42,size*.6,x+Math.sin(j*2)*.1,.62+j*.22,z+Math.cos(j*2)*.1,{name:'室内绿植',shape:'sphere'});});}
+    screen(x,z,a=0,w=2.7){this.at(x,z,a,()=>this.visual('display',{width:w,height:1,depth:.5,name:'培训演示大屏'},()=>{this.b('screen',w,1.45,.07,0,1.65,0,{name:'培训演示大屏'});this.b('metal',.09,.76,.09,0,.42,-.06);this.b('metal',w*.55,.05,.5,0,.06,0);}));}
+    printer(x,z,a=0){this.at(x,z,a,()=>this.visual('printer',{width:.9,height:1,depth:.62,name:'共享打印机'},()=>{this.b('wood',.9,.72,.62,0,.36,0,{name:'打印设备柜'});this.b('metal',.82,.38,.57,0,.91,0,{name:'共享打印机'});this.b('desk',.5,.035,.30,0,1.12,.13,{ignore:true,name:'打印纸'});this.b('screen',.18,.10,.035,.22,1.12,.3,{ignore:true});}));}
+    coffee(x,z,a=0,w=2.3){this.at(x,z,a,()=>this.visual('coffee-station',{width:w,height:1,depth:.62,name:'茶水操作台'},()=>{this.b('wood',w,.91,.62,0,.455,0,{name:'茶水操作台'});this.b('desk',w+.05,.07,.67,0,.95,0);this.b('metal',.4,.43,.4,-w*.27,1.19,0,{name:'咖啡机'});this.b('screen',.13,.13,.035,-w*.27,1.24,.22,{ignore:true});this.b('metal',.55,.035,.4,w*.22,.99,0,{name:'茶水洗涤槽'});this.b('metal',.035,.29,.035,w*.22,1.12,-.17);}));}
+    roomLayout(kind,cx,cz,{w=9,d=7,seed=0}={}){const old=this.room;this.room=`room-${seed}`;const seatStart=this.serial;this.at(cx,cz,0,()=>{
+      if(kind===0){for(const x of [-2.2,.8])for(const z of [-1.9,1.05])this.desk(x,z);this.storage(Math.sign(cx)*3.5,0,Math.PI/2,{w:2.3});this.plant(-3.7,2.8);}
+      else if(kind===1){for(const z of [-1.85,1.85]){for(const x of [-1.85,0,1.85]){this.desk(x,z-.37,Math.PI,{seat:false,width:1.65});this.desk(x,z+.37,0,{seat:false,width:1.65});this.chair(x,z-1.05,0,{name:'共享长桌座椅',keyboard:true,target:{x,z:z-.605}});this.chair(x,z+1.05,Math.PI,{name:'共享长桌座椅',keyboard:true,target:{x,z:z+.605}});}this.b('fabric',5.6,.25,.05,0,.94,z,{name:'长桌吸音屏'});}this.plant(3.8,2.8);}
+      else if(kind===2){for(const x of [-2.6,0,2.6])for(const z of [-1.8,.45]){this.b('desk',1.65,.08,.65,x,.77,z,{name:'培训课桌'});for(const s of [-1,1])this.b('metal',.05,.7,.5,x+s*.65,.37,z);this.chair(x,z-.78,0,{kind:'training',name:'培训座椅'});}this.screen(0,3.35,Math.PI,3.1);this.b('desk',1.1,.92,.55,3.4,.46,2.9,{name:'讲师演示台'});}
+      else if(kind===3){this.table(0,0,{w:3.4,d:1.7,chairs:6,kind:'work'});this.storage(Math.sign(cx)*3.8,0,Math.PI/2,{w:3.8,h:1.4,open:true});this.screen(0,3.25,Math.PI,2.6);this.b('wood',1.4,.04,1.1,0,.85,0,{ignore:true,name:'项目样品与模型'});this.desk(2.5,-2.4,Math.PI,{seat:false});}
+      else if(kind===4){this.desk(-1.8,-1.3,0,{name:'独立负责人工作台',width:1.9});this.storage(0,-3.15,0,{w:5,h:1.2});this.sofa(2.3,.4,Math.PI/2,{width:2.3});this.b('desk',1.3,.08,.85,.9,.45,.4);this.chair(-.1,.4,Math.PI/2,{kind:'lounge',name:'访客座椅'});this.plant(3.8,-2.8);}
+      else if(kind===5){for(const x of [-2.5,2]){this.desk(x,-2);this.desk(x,2,Math.PI);}this.b('glass',.055,1.35,5.8,-.25,.675,0,{ignore:true,name:'工区吸音玻璃隔板'});this.storage(0,3.15,0,{w:2.2,h:.9});}
+      else if(kind===6){this.sofa(-2.9,0,Math.PI/2,{width:3});this.sofa(2.9,0,-Math.PI/2,{width:3});this.b('desk',2.2,.08,1.3,0,.44,0,{name:'休闲讨论茶几'});this.storage(0,-3.1,0,{w:5.8,h:1.7,open:true});this.plant(-3.9,2.8);this.plant(3.9,2.8);}
+      else{this.table(-1.6,-.5,{w:2.1,d:1.5,chairs:4,kind:'work'});this.desk(2.4,-1.5);this.storage(0,3.1,0,{w:5,h:1.3,open:true});this.printer(3.4,2.7);}
+    });this.room=old;return{first:seatStart,last:this.serial};}
+  }
+  L.OfficeKit=OfficeKit;
+})();

@@ -1,0 +1,90 @@
+/* Observation comes first: the city is the interface, daily life is the content. */
+.building-header{justify-content:flex-end;background:transparent;border:0;pointer-events:none}
+.building-intro{top:19%;right:5%;width:48%;max-width:850px}
+.building-intro h1{font-size:clamp(62px,7.7vw,152px);line-height:.96;letter-spacing:-.065em;margin:24px 0 32px}
+.building-intro h2{font-size:clamp(15px,1.3vw,24px);letter-spacing:1px}
+.building-intro p{font-size:13px;letter-spacing:.5px;line-height:2.15}
+.building-floor-panel{bottom:64px}.building-heading{max-width:440px}
+.building-brand,.building-header nav,.building-location,.building-bottom,#society-overview{display:none!important}
+.app-header .brand,.main-nav,#help-button,.method-note{display:none!important}
+.app-header{justify-content:flex-end;background:transparent;box-shadow:none;border:0;pointer-events:none}
+.app-header .header-project{margin-right:auto;margin-left:10px}.header-clock{display:none}
+.office-society-mode .control-panel{display:none!important}
+.office-society-mode .stage-bottom .layer-pills{display:none}
+.office-society-mode .stage-hints{display:none}
+.office-society-mode .results-panel{top:146px}
+.office-society-mode .results-heading{display:none}
+.office-society-mode .stage-caption{top:145px}
+.office-society-mode .stage-caption .eyebrow{font-size:8px}
+.office-society-mode .stage-badge{display:none}
+.office-society-mode #export-button{display:none}
+#society-narrative{font-size:11px;line-height:1.9;margin:0 0 23px;color:var(--building-ink)}
+.event-section .section-heading h3{font-size:12px}
+#journey-panel{position:fixed;left:28px;bottom:105px;width:310px;padding:17px 20px;z-index:40;border:1px solid #fff;border-radius:10px;background:#f8fbf2e8;backdrop-filter:blur(16px);color:var(--building-ink);box-shadow:0 6px 28px #18344c12;box-sizing:border-box}
+#journey-panel[hidden]{display:none}#journey-panel b{font-size:14px;font-weight:500}#journey-panel p{font-size:11px;line-height:1.8;margin:9px 0}#journey-panel small{display:block;margin-top:12px;font-size:9px;line-height:1.6;color:var(--muted)}
+#journey-actions{display:flex;gap:7px}#journey-actions button{font-size:11px;padding:9px 13px;background:var(--building-accent);color:#fff;border-radius:5px}#journey-actions select{font-size:11px;padding:7px}
+body[data-journey-view=walk] .stage-caption,body[data-journey-view=walk] .results-panel{display:none!important}
+body[data-journey-view=walk] .agent-state-bubbles{display:none}
+/* Quiet game HUD; architectural controls return when Escape releases the mouse. */
+#first-person-hud{position:fixed;inset:0;z-index:44;pointer-events:none;font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:#23394c}
+#first-person-hud[hidden]{display:none}.fp-top{position:absolute;left:30px;top:28px;border-left:3px solid #e1473e;padding-left:13px;text-shadow:0 1px 8px #fff}.fp-top b{font:10px Consolas,monospace;letter-spacing:2px}.fp-top b span{margin-left:12px;font-size:19px;letter-spacing:0}.fp-top small{display:block;font-size:10px;margin-top:8px;color:#57728a}
+.fp-reticle{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#f15b4e;box-shadow:0 0 0 2px #fff9,0 0 10px #35546a22}
+.fp-controls{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);font-size:10px;letter-spacing:.5px;white-space:nowrap;color:#365469;text-shadow:0 1px 5px white}.fp-controls span{margin-left:19px}
+.fp-combos{position:absolute;left:50%;bottom:51px;transform:translateX(-50%);font-size:9px;letter-spacing:1px;white-space:nowrap;color:#8b3e46;text-shadow:0 1px 5px white}
+body.first-person-locked .app-header,body.first-person-locked #interior-building-bar,body.first-person-locked #building-theme-switch,body.first-person-locked .stage-toolbar,body.first-person-locked .playback-bar,body.first-person-locked #journey-actions,body.first-person-locked #journey-panel>small{display:none!important}
+body.first-person-locked #journey-panel{bottom:75px;background:#f9fcfedb;border:0;box-shadow:0 4px 25px #1d3b4d10;pointer-events:none}
+body.first-person-locked #viewport canvas{cursor:none}
+body.first-person-locked .workspace{inset:0!important}
+body.first-person-locked .toast{display:none!important}
+#scenario-dock{position:fixed;right:30px;top:91px;z-index:48;display:flex;gap:12px;align-items:center;padding:9px 12px;background:#f7fbfde6;border:1px solid white;border-radius:7px;color:#4c6a80;font-size:10px;backdrop-filter:blur(16px)}#scenario-dock button{padding:7px 11px;border-radius:4px;font-size:11px;background:#e5eef5;color:#335b7a}.zombie-mode #zombie-toggle{background:#a52c35;color:white}.zombie-mode #zombie-summary{color:#9c3038}
+body.first-person-locked #scenario-dock{top:26px;right:28px;background:#f9fbfbd6}body.first-person-locked #scenario-dock button{display:none}
+body[data-continuous-tower=true] #interior-floor-select,body[data-continuous-tower=true] #interior-floor-prev,body[data-continuous-tower=true] #interior-floor-next{display:none}
+#escape-result{position:fixed;inset:0;z-index:120;display:grid;place-items:center;background:#14232b8c;backdrop-filter:blur(7px)}#escape-result[hidden]{display:none}#escape-result>div{width:min(420px,85vw);padding:38px;background:#f0f3f3;border-top:4px solid #a7353c;box-shadow:0 20px 80px #0004}#escape-result small{font:9px Consolas,monospace;letter-spacing:2px;color:#8294a2}#escape-result h2{font-size:32px;font-weight:400;letter-spacing:2px;margin:18px 0}#escape-result p{font-size:13px;line-height:1.9;color:#637481}#escape-result button{padding:12px 20px;margin:18px 10px 0 0;background:#922f37;color:#fff;border-radius:4px}#escape-result button+button{background:#dce4e9;color:#355368}
+#combat-feedback{position:fixed;left:50%;top:58%;transform:translateX(-50%);z-index:55;pointer-events:none;color:#942832;font-size:13px;letter-spacing:2px;text-shadow:0 1px 7px white}#combat-feedback[hidden]{display:none}
+#character-assets-open{position:fixed;left:28px;top:28px;z-index:49;padding:9px 14px;border:1px solid #fff;border-radius:5px;background:#f4f8fbe6;color:#44627a;font:11px "Microsoft YaHei",sans-serif;backdrop-filter:blur(12px)}
+body[data-building-phase=interior] #character-assets-open{top:92px}
+#character-population-progress{margin:16px 0 10px;font:11px Consolas,"Microsoft YaHei",sans-serif;color:#2974a2}#character-population-start{font-size:10px;color:#356a91;background:#deebf4;padding:9px 12px;border-radius:4px;margin-bottom:16px}#character-population-start:disabled{opacity:.5}
+body.first-person-locked #character-assets-open{display:none}
+#character-assets-panel{width:min(440px,90vw);box-sizing:border-box;padding:30px;border:1px solid white;border-radius:12px;background:#f2f6f8;color:#2b4558;box-shadow:0 30px 100px #11273542;font:12px "Segoe UI","Microsoft YaHei",sans-serif;max-height:90vh;overflow:auto}
+#character-assets-panel::backdrop{background:#17364d55;backdrop-filter:blur(6px)}.asset-heading{display:flex;justify-content:space-between;align-items:start}.asset-heading small{font:8px Consolas,monospace;letter-spacing:1.7px;color:#7793aa}.asset-heading h2{font-size:27px;font-weight:400;margin:10px 0}.asset-heading button{background:transparent;color:#56788d;font-size:24px;padding:0 4px}.asset-intro{font-size:11px;line-height:1.8;color:#6c879a;margin:10px 0 24px}
+.asset-choice{padding:17px 0;border-top:1px solid #d8e2e9}.asset-choice>div{display:flex;justify-content:space-between;align-items:center}.asset-choice b{font-size:14px;font-weight:500}.asset-switch{display:flex;gap:7px;align-items:center;font-size:11px;color:#486e89}.asset-switch input{accent-color:#297fc0;width:15px;height:15px}.asset-choice select{display:block;width:100%;background:#fff;border:1px solid #dbe5ec;padding:10px;color:#426079;margin:13px 0 8px;border-radius:5px;font:11px inherit}.asset-choice>small{font-size:10px;color:#7890a1}#character-asset-jobs{border-top:1px solid #d8e2e9;padding:14px 0 0}#character-asset-jobs>div{display:flex;justify-content:space-between;font-size:10px;color:#728da1;line-height:2.2}#character-asset-jobs>div span+span{color:#387ca6}#character-asset-status{font-size:11px;line-height:1.9;min-height:40px;color:#3b779b;margin:14px 0}.asset-buttons{display:flex;gap:9px}.asset-buttons button{background:#dfeaf2;color:#426b88;padding:10px 16px;border-radius:5px;font-size:11px}.asset-buttons button+button{background:#277fb9;color:white}.asset-buttons button:disabled{opacity:.45;cursor:default}.asset-path{display:block;font-size:9px;color:#91a4b2;line-height:1.9;margin-top:20px}
+.player-infected::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:52;box-shadow:inset 0 0 120px 15px #8b172b5e;border:1px solid #b03b4140}
+@media(max-width:760px){#scenario-dock{right:12px;top:122px;gap:6px;padding:6px}#scenario-dock button{font-size:9px;padding:5px}#zombie-summary{font-size:8px}body.first-person-locked #scenario-dock{top:76px;right:12px}}
+@media(max-width:760px){.fp-top{left:16px;top:18px}.fp-controls{font-size:8px;bottom:15px}.fp-controls span{margin-left:7px}.fp-controls span:last-child{display:none}}
+@media(max-width:760px){.building-intro{top:19%;right:6%;width:88%}.building-intro h1{font-size:clamp(48px,13vw,87px)}.building-intro h2{font-size:13px}.building-intro p{font-size:10px}.building-floor-panel{bottom:65px}.building-heading{max-width:230px}.building-heading h1{font-size:18px}#journey-panel{left:12px;bottom:138px;width:270px;padding:13px 16px}.office-society-mode .stage-caption{max-width:230px}.office-society-mode .results-panel{display:none}}
+
+/* Full-resolution observation UI. Only disaster experiments occupy the left panel. */
+.app-header{display:none!important}.workspace{inset:0!important;top:0!important;height:100vh}.building-header{background:none!important;backdrop-filter:none!important;box-shadow:none!important}
+#building-theme-switch,body[data-building-phase=interior] #building-theme-switch{top:24px;right:28px}#building-theme-switch button{font-size:10px;padding:6px 10px}
+#scenario-dock,.fp-combos,#combat-feedback{display:none!important}
+.office-society-mode .control-panel{display:block!important;top:210px;bottom:auto;max-height:calc(100vh - 270px);height:auto;width:280px;left:20px}
+.office-society-mode .control-panel>:not(#disaster-controls){display:none!important}.office-society-mode #disaster-controls{display:block!important;border:0;margin:0;padding:6px 0}
+.office-society-mode #disaster-controls .step{display:none}.office-society-mode #disaster-status{margin-bottom:10px}
+body.first-person-locked .control-panel{display:none!important}.office-society-mode .stage-caption{left:330px;top:210px}.office-society-mode .results-panel{top:210px}
+body[data-building-phase=interior] #character-assets-open{top:24px;left:28px}#interior-building-bar{top:24px!important}body[data-building-phase=interior] .stage-toolbar{top:88px!important}
+body.menus-hidden .fp-controls{display:none}
+.control-panel>:not(#disaster-controls){display:none!important}body[data-building-phase=interior] .control-panel{display:block!important;top:210px;bottom:auto;max-height:calc(100vh - 270px);height:auto;width:280px;left:20px}body.first-person-locked .control-panel{display:none!important}
+
+body[data-journey-view=walk]:not(.first-person-locked) #character-assets-open{top:102px}body.menus-hidden #character-assets-open,body.menus-hidden #interior-building-bar,body.menus-hidden #building-theme-switch{display:none!important}
+
+/* Stable observation panels, attached below the shared top row. */
+body[data-building-phase=interior] .control-panel,.office-society-mode .control-panel{top:72px!important;left:16px!important;max-height:calc(100vh - 200px)}
+body[data-building-phase=interior] .results-panel,.office-society-mode .results-panel{top:72px!important;right:16px!important;bottom:100px!important;width:280px}
+.office-society-mode .stage-caption{top:72px!important;left:320px!important}.office-society-mode .stage-bottom .layer-pills{display:flex!important}
+.office-society-mode .stage-bottom{bottom:18px}.office-society-mode .playback-bar{bottom:68px}.office-society-mode .results-panel>:not(#society-activity-panel):not(.event-section):not(#crowd-heat-panel){display:none!important}
+.office-society-mode .results-panel .event-section{display:block!important}.office-society-mode .results-panel{overflow:auto}
+body[data-building-phase=interior] .stage-toolbar{top:72px!important}.stage-bottom .layer-pills{justify-content:center}
+body[data-building-phase=interior] .stage-caption{max-width:245px}.agent-state-bubble{transition:none!important}
+
+.office-society-mode .results-panel #crowd-heat-panel{display:block!important}#society-people-list{max-height:245px;overflow:auto}#society-narrative{margin-bottom:13px}.office-society-mode #crowd-heat-panel{padding:14px 0}#crowd-heat-panel .hint{font-size:9px}#society-activity-panel .society-metrics{margin-bottom:14px}
+
+body[data-continuous-tower=true] .stage-bottom{bottom:55px}.fp-controls{bottom:14px}
+
+#render-output-scale{font:10px "Microsoft YaHei",sans-serif;color:#49687f;background:#f7fafc;border:1px solid #d4e0e9;border-radius:14px;padding:4px 7px;margin-left:7px;max-width:115px}
+
+#building-theme-switch{width:max-content;max-width:calc(100vw - 32px)}#building-theme-switch button{white-space:nowrap;flex-shrink:0}#render-output-scale{width:112px;flex:0 0 112px}@media(max-width:1700px){#render-output-scale{position:fixed;right:28px;top:47px;height:22px;padding-top:2px;padding-bottom:2px}}
+#building-theme-switch{flex-wrap:wrap;justify-content:flex-end}
+#building-theme-switch .mirror-edge-color:not([hidden]){display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:12px;background:#fafafae8;color:#566270;font-size:9px}
+#mirror-edge-color{width:24px;height:20px;padding:1px;border:0;background:transparent;cursor:pointer}
+
+#building-reset-camera{min-width:88px;white-space:nowrap}#building-ui .building-view-tools #building-reset-camera[aria-pressed="true"]{background:var(--building-accent)!important;color:white!important}#matrix-status{position:absolute;left:32px;top:220px;background:rgba(255,255,255,.9);padding:10px 15px;border:1px solid #c4d9e7;border-radius:8px;color:#356785;font:11px monospace;letter-spacing:.08em;pointer-events:none}@media(max-width:760px){#matrix-status{left:17px;top:235px;max-width:calc(100vw - 160px);font-size:9px}}

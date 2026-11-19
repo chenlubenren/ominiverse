@@ -1,0 +1,326 @@
+/* Shared observation frame. Scene state still owns visibility and camera behavior. */
+.building-intro h2 {line-height:1.8;text-wrap:balance}
+body[data-co-environment] {
+  --ob-edge:28px;
+  --ob-gap:16px;
+  --ob-sidebar:264px;
+  --ob-index:220px;
+  --ob-title-top:24px;
+  --ob-tools-top:84px;
+  --ob-card-top:148px;
+  --ob-radius:12px;
+  --ob-padding:20px;
+  --building-left:var(--ob-edge);
+  --building-card-width:var(--ob-sidebar);
+  --building-card-top:var(--ob-card-top);
+}
+
+/* Titles belong to the left rail, leaving the middle of the scene unobstructed. */
+body[data-co-environment=office][data-building-phase=overview] .building-heading,
+body[data-co-environment] #station-ui .st-heading,
+body[data-co-environment] #co-environment-ui .co-env-title {
+  left:var(--ob-edge);top:var(--ob-title-top);right:auto;
+  width:min(440px,42vw);max-width:none;
+}
+body[data-co-environment=office][data-building-phase=overview] .building-heading>span,
+body[data-co-environment] :is(.building-heading,.st-heading,.co-env-title)>:is(span,small) {
+  font:9px/1.6 Consolas,monospace;letter-spacing:1.5px;
+}
+body[data-co-environment=office][data-building-phase=overview] .building-heading h1,
+body[data-co-environment] #station-ui .st-heading h1,
+body[data-co-environment] #co-environment-ui .co-env-title h1 {
+  margin:7px 0 8px;font-size:24px;font-weight:400;line-height:1.45;letter-spacing:.5px;
+}
+body[data-co-environment=office][data-building-phase=overview] .building-heading>p,
+body[data-co-environment] :is(.building-heading,.st-heading,.co-env-title)>p {
+  width:auto;margin:0;font-size:10px;line-height:1.8;letter-spacing:0;
+}
+
+/* Scene switching and view controls use two orderly rows. */
+body[data-co-environment] #co-scene-nav {
+  top:var(--ob-title-top);right:var(--ob-edge);height:40px;box-sizing:border-box;
+  border-radius:9px;
+}
+body[data-co-environment] #co-scene-nav button {height:30px;padding-block:6px}
+body[data-co-environment=office][data-building-phase=overview] .building-view-tools,
+body[data-co-environment] #station-ui .st-tools,
+body[data-co-environment] #co-environment-ui .co-env-controls {
+  position:fixed;left:auto;right:var(--ob-edge);top:var(--ob-tools-top);bottom:auto;
+  transform:none;gap:6px;flex-wrap:nowrap;align-items:center;
+  width:max-content;max-width:calc(100vw - 2 * var(--ob-edge));
+  padding:5px;border:1px solid #dce6ee;border-radius:10px;background:#f8fbfdeb;
+  backdrop-filter:blur(18px);box-sizing:border-box;
+}
+body[data-co-environment] #station-ui .st-tools {border-color:var(--st-line);background:var(--st-card)}
+body[data-co-environment=office] .building-view-tools button,
+body[data-co-environment] #station-ui .st-tools button,
+body[data-co-environment] #co-environment-ui .co-env-controls button {
+  min-height:32px;height:32px;padding:6px 12px!important;border:0!important;
+  border-radius:6px;font-size:11px!important;white-space:nowrap;box-shadow:none;backdrop-filter:none;
+}
+body[data-co-environment] #station-ui .st-tools span {display:inline}
+body[data-co-environment=office][data-building-phase=interior] .stage-toolbar {
+  top:var(--ob-tools-top)!important;left:auto;right:var(--ob-edge);transform:none;
+  height:44px;padding:5px;border-radius:10px;box-sizing:border-box;
+}
+
+/* Information and indices share the same top edge and conversation clearance. */
+body[data-co-environment=office][data-building-phase] #building-action-dock,
+body[data-co-environment] #station-ui .st-observation-dock {
+  position:fixed;z-index:66;display:flex;flex-direction:column;
+  top:var(--ob-card-top);left:var(--ob-edge);width:var(--ob-sidebar);gap:10px;
+  max-height:calc(100dvh - var(--ob-card-top) - var(--co-chat-clearance,150px));
+  pointer-events:none;
+}
+body[data-co-environment] #building-floor-sidebar,
+body[data-co-environment] #station-ui .st-panel,
+body[data-co-environment] #station-ui .st-shell-preview-card,
+body[data-co-environment] #co-environment-ui .co-env-panel {
+  left:var(--ob-edge);top:var(--ob-card-top);right:auto;bottom:auto;
+  width:var(--ob-sidebar);max-width:none;padding:var(--ob-padding);
+  max-height:calc(100dvh - var(--ob-card-top) - var(--co-chat-clearance,150px));
+  border-radius:var(--ob-radius);box-sizing:border-box;overflow:auto;scrollbar-width:thin;
+}
+body[data-co-environment=office][data-building-phase] #building-floor-sidebar,
+body[data-co-environment] #station-ui .st-observation-dock .st-panel,
+body[data-co-environment] #station-ui .st-observation-dock .st-shell-preview-card {
+  position:relative;inset:auto;width:100%;max-height:none;min-height:0;flex:0 1 auto;
+}
+/* Deployment always follows the first-person entry within the left action stack. */
+body[data-co-environment=office][data-building-phase] #building-action-dock>button,
+body[data-co-environment] #station-ui .st-observation-dock>#st-partners,
+body[data-co-environment] #station-ui .st-observation-dock>#st-walk {
+  position:static;inset:auto;flex:none;width:100%;min-height:38px;height:38px;margin:0;padding:0 12px;
+  display:flex;align-items:center;justify-content:center;pointer-events:auto;
+  border:1px solid #1980d0;border-radius:8px;background:#2589df;color:#fff!important;
+  font:12px 'Microsoft YaHei',sans-serif;box-shadow:none;backdrop-filter:none;cursor:pointer;
+}
+body[data-co-environment] #station-ui .st-observation-dock>:is(#st-partners,#st-walk) {
+  background:#335d7c;border-color:#52718a;font-size:11px!important;
+}
+body[data-co-environment=office][data-building-phase] #building-action-dock>.ob-interior-walk {display:none}
+body[data-co-environment=office][data-building-phase=interior] #building-action-dock>.ob-interior-walk {display:flex}
+body[data-co-environment=campus] #collaboration-open {display:none!important}
+body[data-co-environment]:not([data-co-environment=office]) #building-action-dock {display:none!important}
+body[data-co-environment] .building-floor-panel,
+body[data-co-environment] #station-ui .st-modules {
+  top:var(--ob-card-top);right:var(--ob-edge);bottom:var(--co-chat-clearance,150px);
+  width:var(--ob-index);padding:18px 14px 12px;border-radius:var(--ob-radius);
+}
+body[data-co-environment=office][data-building-phase=interior] .results-panel {
+  top:var(--ob-card-top)!important;right:var(--ob-edge)!important;
+  bottom:var(--co-chat-clearance,150px)!important;width:var(--ob-index);
+  padding:var(--ob-padding);border-radius:var(--ob-radius);
+}
+body[data-co-environment] :is(.floor-panel-title,.st-index-title) {min-height:38px;margin-bottom:12px}
+body[data-co-environment] :is(.building-focus-card,.co-env-panel) h2 {
+  margin:10px 0 8px;font-size:19px;font-weight:500;line-height:1.5;
+}
+body[data-co-environment] #st-shape-status {
+  top:130px;right:calc(var(--ob-edge) + var(--ob-index) + var(--ob-gap));left:auto;
+  max-width:calc(100vw - var(--ob-sidebar) - var(--ob-index) - 4 * var(--ob-edge));
+  margin:8px 0;font-size:10px;line-height:1.7;
+}
+
+.co-env-panel {
+  position:absolute;pointer-events:auto;border:1px solid #fff;background:#f9fcffe6;
+  box-shadow:0 12px 42px #45637a0b;backdrop-filter:blur(20px);font:12px/1.5 'Segoe UI','Microsoft YaHei',sans-serif;
+}
+#co-environment-ui .co-env-panel>small {font:8px/1.6 Consolas,monospace;letter-spacing:1.6px}
+.co-env-metrics {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #dce6ee}
+.co-env-metrics>:is(div,span) {display:flex;flex-direction:column;gap:6px}
+.co-env-metrics b {font:25px/1.2 Consolas,monospace;color:var(--building-accent,#2589df)}
+#co-environment-ui .co-env-metrics small {font:9px/1.5 'Microsoft YaHei',sans-serif;letter-spacing:0;white-space:nowrap}
+.co-env-actions {display:grid;grid-template-columns:1fr;gap:8px;margin-top:20px}
+.co-env-actions button {min-height:36px;padding:8px;border:0;border-radius:6px;background:#e9f0f6;color:inherit;font:11px/1.5 'Microsoft YaHei',sans-serif;cursor:pointer}
+.co-env-actions button:not(:first-child) {background:var(--building-accent,#2589df);color:white}
+.co-env-panel button:focus-visible {outline:2px solid var(--building-accent,#2589df);outline-offset:3px}
+
+body[data-co-environment] :is(.building-footer,.st-foot,.co-env-status) {
+  left:var(--ob-edge);right:var(--ob-edge);bottom:0;height:36px;box-sizing:border-box;
+  display:flex;align-items:center;margin:0;border-top:1px solid #91a6b526;
+  font:8px/1.5 Consolas,'Microsoft YaHei',monospace;letter-spacing:.5px;
+}
+/* Keep the bounded, resizable log in the orbital scene as well. */
+body[data-co-environment][data-co-chat] #co-observation-chat {
+  display:grid;left:var(--ob-edge);right:var(--ob-edge);bottom:44px;border-radius:var(--ob-radius);
+}
+/* Positioning must not re-enable controls hidden by intro or first-person mode. */
+body[data-building-phase=intro] :is(#co-scene-nav,#collaboration-open),
+body.first-person-locked :is(#co-scene-nav,#collaboration-open) {display:none!important}
+
+@media(min-width:761px) and (max-width:1100px) {
+  body[data-co-environment] {--ob-edge:20px;--ob-sidebar:240px;--ob-index:196px;--ob-padding:16px}
+  body[data-co-environment] :is(.building-heading,.st-heading,.co-env-title)>p {max-width:300px}
+}
+@media(min-width:761px) and (max-height:800px) {
+  body[data-co-environment] {--ob-card-top:140px;--ob-padding:16px}
+  body[data-co-environment] #station-ui .st-panel h2 {font-size:17px;margin:7px 0}
+}
+
+/* On phones, matching compact docks leave an open area between tools and cards. */
+@media(max-width:760px) {
+  body[data-co-environment] {
+    --ob-edge:12px;--ob-gap:12px;--ob-sidebar:calc(100vw - 142px);--ob-index:106px;
+    --ob-title-top:64px;--ob-tools-top:140px;--ob-card-top:194px;--ob-padding:12px;
+  }
+  body[data-co-environment] #co-scene-nav {
+    top:12px;left:12px;right:12px;width:auto;height:36px;padding:3px;gap:2px;
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  body[data-co-environment] #co-scene-nav button {height:28px;min-width:0;padding:4px 2px;font-size:10px;white-space:nowrap}
+  body[data-co-environment=office][data-building-phase=overview] .building-heading,
+  body[data-co-environment] #station-ui .st-heading,
+  body[data-co-environment] #co-environment-ui .co-env-title {
+    left:12px;right:12px;top:64px;width:auto;max-width:none;
+  }
+  body[data-co-environment=office][data-building-phase=overview] .building-heading>span,
+  body[data-co-environment] :is(.building-heading,.st-heading,.co-env-title)>:is(span,small) {font-size:8px;letter-spacing:1px}
+  body[data-co-environment=office][data-building-phase=overview] .building-heading h1,
+  body[data-co-environment] #station-ui .st-heading h1,
+  body[data-co-environment] #co-environment-ui .co-env-title h1 {font-size:19px;line-height:1.35;margin:3px 0 4px;letter-spacing:0}
+  body[data-co-environment=office][data-building-phase=overview] .building-heading>p,
+  body[data-co-environment] :is(.building-heading,.st-heading,.co-env-title)>p {font-size:9px;line-height:1.6}
+  body[data-co-environment=office][data-building-phase=overview] .building-view-tools,
+  body[data-co-environment] #station-ui .st-tools,
+  body[data-co-environment] #co-environment-ui .co-env-controls {
+    top:var(--ob-tools-top);left:12px;right:12px;width:auto;max-width:none;
+    gap:3px;padding:4px;justify-content:flex-start;overflow-x:auto;scrollbar-width:none;
+  }
+  body[data-co-environment=office] .building-view-tools button,
+  body[data-co-environment] #station-ui .st-tools button,
+  body[data-co-environment] #co-environment-ui .co-env-controls button {
+    min-height:32px;height:32px;flex:none;padding:6px 9px!important;font-size:10px!important;
+  }
+  body[data-co-environment=office][data-building-phase] #building-action-dock,
+  body[data-co-environment] #station-ui .st-observation-dock {
+    top:auto;bottom:var(--co-chat-clearance,126px);max-height:min(320px,40dvh);gap:8px;
+  }
+  body[data-co-environment] #building-floor-sidebar,
+  body[data-co-environment] #station-ui .st-panel,
+  body[data-co-environment] #station-ui .st-shell-preview-card,
+  body[data-co-environment] #co-environment-ui .co-env-panel {
+    top:auto;bottom:var(--co-chat-clearance,126px);max-height:min(260px,36dvh);
+    left:12px;right:auto;width:var(--ob-sidebar);padding:12px;
+  }
+  body[data-co-environment] #co-environment-ui .co-env-panel {max-height:min(320px,40dvh)}
+  body[data-co-environment=office][data-building-phase] #building-floor-sidebar,
+  body[data-co-environment] #station-ui .st-observation-dock .st-panel,
+  body[data-co-environment] #station-ui .st-observation-dock .st-shell-preview-card {inset:auto;width:100%;max-height:none}
+  body[data-co-environment=office][data-building-phase] #building-action-dock>button,
+  body[data-co-environment] #station-ui .st-observation-dock>:is(#st-partners,#st-walk) {height:34px;min-height:34px;font-size:11px}
+  body[data-co-environment] .building-floor-panel,
+  body[data-co-environment] #station-ui .st-modules {
+    top:var(--ob-card-top);right:12px;bottom:var(--co-chat-clearance,126px);padding:12px 8px;
+  }
+  body[data-co-environment] :is(.floor-panel-title,.st-index-title) {min-height:32px;margin-bottom:10px}
+  body[data-co-environment] :is(.building-focus-card,.co-env-panel) h2 {font-size:15px;margin:5px 0}
+  #co-environment-ui .co-env-panel p {font-size:9px;line-height:1.8}
+  .co-env-metrics {gap:5px;margin-top:10px;padding-top:10px}
+  .co-env-metrics b {font-size:19px}
+  #co-environment-ui .co-env-metrics small {font-size:8px}
+  .co-env-actions {margin-top:12px;gap:5px}
+  .co-env-actions button {font-size:10px;min-height:34px;padding:7px 5px}
+  body[data-co-environment] #st-shape-status {
+    top:184px;left:12px;right:130px;max-width:none;margin:0;font-size:9px;
+  }
+  body[data-co-environment][data-co-chat] #co-observation-chat:not(.is-editing) {
+    grid-template-rows:0 0 50px;height:auto;min-height:0;padding:8px 10px;
+  }
+  body[data-co-environment][data-co-chat] #co-observation-chat:not(.is-editing) :is(#co-observation-log,#co-chat-resize) {display:none}
+  body[data-co-environment][data-co-chat] #co-chat-activate {height:50px}
+  body[data-co-environment][data-co-chat] #co-observation-chat.is-editing {
+    grid-template-rows:16px minmax(0,min(var(--co-chat-log-height,64px),max(40px,calc(45dvh - 40px - var(--co-chat-editor-height))))) var(--co-chat-editor-height);
+  }
+  body[data-co-environment] :is(.building-footer,.st-foot,.co-env-status) {font-size:7px;letter-spacing:0}
+
+  /* Indoor navigation remains a bottom dock; the camera reads its actual bounds. */
+  body[data-co-environment] #station-ui[data-phase=interior]:not([data-view=walk]) .st-observation-dock {
+    left:12px;right:12px;width:auto;max-height:none;
+  }
+  body[data-co-environment] #station-ui[data-phase=interior]:not([data-view=walk]) .st-observation-dock .st-panel {
+    inset:auto;width:100%;max-height:none;padding:12px;
+  }
+  body[data-co-environment] #station-ui[data-phase=interior]:not([data-view=walk]) .st-modules {
+    top:118px;bottom:calc(var(--co-chat-clearance,126px) + 208px);
+  }
+  body[data-co-environment] #station-ui[data-phase=interior] .st-tools,
+  body[data-co-environment=office][data-building-phase=interior] .stage-toolbar {top:64px!important}
+  body[data-co-environment=office][data-building-phase=interior] .stage-toolbar {left:12px;right:12px;width:auto;max-width:none}
+  body[data-co-environment=office][data-building-phase=interior] .stage-toolbar .view-tabs button {font-size:9px;padding:6px 7px}
+  body[data-co-environment=office][data-building-phase=interior] #building-action-dock {
+    left:12px;right:12px;bottom:calc(var(--co-chat-clearance,126px) + 120px);width:auto;max-height:none;
+  }
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar {
+    display:grid;grid-template-columns:32px minmax(0,1fr) 96px 32px;gap:8px 6px;
+    inset:auto;width:100%;max-height:none;padding:12px;overflow:visible;
+  }
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar :is(.building-kicker,#focus-description,.focus-metrics,.focus-avatar-color,#interior-floor-label) {display:none}
+  body[data-co-environment=office][data-building-phase=interior] #focus-title {grid-column:1/3;grid-row:1;margin:0;font-size:14px;line-height:1.6;align-self:center}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-building-bar {display:contents}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-floor-prev {grid-column:1;grid-row:2}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-floor-select {grid-column:2/4;grid-row:2;font-size:10px}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-floor-next {grid-column:4;grid-row:2}
+  body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar #interior-building-back {grid-column:3/5;grid-row:1;margin:0;padding:7px 4px;min-height:32px;font-size:10px}
+}
+
+/* Indoor simulation and layers share the left rail above the floor card. */
+#co-interior-toggle {display:none}
+#co-interior-controls {
+  flex:none;min-width:0;padding:12px;pointer-events:auto;
+  border:1px solid #fff;border-radius:var(--ob-radius,12px);
+  background:rgba(249,252,255,.94);box-shadow:0 6px 22px #27436512;backdrop-filter:blur(18px);
+}
+body[data-co-environment=office][data-building-phase=interior] #building-action-dock {
+  overflow-y:auto;scrollbar-width:thin;pointer-events:auto;
+}
+body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar {flex:none}
+#co-interior-controls .playback-bar {
+  position:static;inset:auto;transform:none;display:grid;
+  grid-template-columns:minmax(0,1fr) 28px 66px;gap:8px 6px;
+  width:100%;max-width:none;height:auto;min-height:0;padding:0;margin:0;
+  border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;
+}
+#co-interior-controls .play-button {grid-column:1;grid-row:1;min-width:0;width:100%;height:34px;gap:7px;font-size:11px}
+#co-interior-controls #reset-button {grid-column:2;grid-row:1;width:28px;height:32px}
+#co-interior-controls .playback-time {grid-column:3;grid-row:1;min-width:0;margin:0;text-align:right}
+#co-interior-controls .playback-time b {font-size:17px}
+#co-interior-controls .playback-time small {font-size:6px;letter-spacing:0;margin-top:3px}
+#co-interior-controls .playback-divider {display:none}
+#co-interior-controls .playback-label {display:block;grid-column:1;grid-row:2;justify-self:start;font-size:9px}
+#co-interior-controls .speed-tabs {grid-column:2/4;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+#co-interior-controls .speed-tabs button {min-height:28px;padding:5px;font-size:10px}
+#co-interior-controls .frame-meter {display:flex;grid-column:1;grid-row:2;justify-self:end;min-width:0;margin:0;gap:3px;font-size:7px}
+#co-interior-controls .frame-meter .live-dot {width:4px;height:4px}
+#co-interior-controls .stage-bottom {position:static;inset:auto;transform:none;margin:10px 0 0;padding-top:10px;border-top:1px solid #dce6ee}
+#co-interior-controls .stage-bottom .layer-pills {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+#co-interior-controls .layer-pills label {display:flex;align-items:center;min-width:0;min-height:28px;padding:5px 6px;font-size:10px;white-space:nowrap;box-shadow:none;backdrop-filter:none}
+#co-interior-controls .layer-pills input {flex:none;width:11px;height:11px;margin-right:5px}
+#co-interior-controls .stage-hints {display:none}
+@media(max-width:760px) {
+  body[data-co-environment=office][data-building-phase=interior] #co-interior-toggle {
+    display:grid;place-items:center;position:fixed;z-index:68;top:116px;left:12px;
+    width:40px;height:36px;padding:0;border:1px solid #fff;border-radius:9px;
+    background:#f9fcfff0;color:#44627a;box-shadow:0 4px 18px #27436512;backdrop-filter:blur(18px);
+    font:24px/1 'Segoe UI',sans-serif;cursor:pointer;
+  }
+  body[data-co-environment=office][data-building-phase=interior] #co-interior-toggle[aria-expanded=true] {background:#2589df;color:#fff}
+  #co-interior-toggle:focus-visible {outline:3px solid #165d9b;outline-offset:3px}
+  body[data-co-environment=office][data-building-phase=interior]:not([data-co-interior-controls=open]) #building-action-dock {display:none}
+  body[data-co-environment=office][data-building-phase=interior] #building-action-dock {
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;
+    top:auto;bottom:var(--co-chat-clearance,126px);max-height:calc(100dvh - 164px - var(--co-chat-clearance,126px));
+  }
+  #co-interior-controls,body[data-co-environment=office][data-building-phase=interior] #building-floor-sidebar {grid-column:1/-1}
+  #co-interior-controls {padding:10px}
+  #co-interior-controls .stage-bottom .layer-pills {grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  #co-interior-controls .layer-pills label {padding:5px;font-size:9px;min-height:28px}
+}
+/* Short phones leave room to see and orbit the scene above the scrollable dock. */
+@media(max-width:760px) and (max-height:650px) {
+  body[data-co-environment=office][data-building-phase=interior] #building-action-dock {
+    max-height:min(40dvh,calc(100dvh - 164px - var(--co-chat-clearance,126px)));
+  }
+}
+body.menus-hidden #co-interior-toggle,body.first-person-locked #co-interior-toggle,
+body[data-exploration=true] #co-interior-toggle {display:none!important}

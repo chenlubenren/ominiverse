@@ -1,0 +1,23 @@
+/* Story controls share the observation chat; cinematic capture can hide this layer. */
+body[data-station-story] #station-ui{visibility:hidden;pointer-events:none}
+.st-story-ui{position:fixed;inset:0;z-index:42;pointer-events:none;color:#e8f1f5;font-family:Inter,"Microsoft YaHei",sans-serif}
+.st-story-ui[hidden]{display:none}
+.st-story-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:30px 36px;background:linear-gradient(#07131feb,transparent)}
+.st-story-header small{font-size:10px;letter-spacing:2px;color:#9cbdcf}.st-story-header h2{font-size:29px;font-weight:500;letter-spacing:2px;margin:10px 0}.st-story-header p{font-size:12px;color:#b9ced9;margin:0}
+.st-story-controls{display:flex;gap:8px;pointer-events:auto}.st-story-ui button{font:inherit;font-size:12px;color:#d6e7ec;background:#173140d9;border:1px solid #81abbe50;border-radius:7px;padding:9px 13px;cursor:pointer;backdrop-filter:blur(12px)}
+.st-story-ui button:hover{background:#294957}.st-story-ui button:focus-visible{outline:2px solid #a8e5d3;outline-offset:3px}.st-story-ui button:disabled{opacity:.45;cursor:default}.st-story-ui button[aria-pressed=true]{color:#c0f1db;border-color:#88cfb2;background:#1e493fcf}
+.st-story-caption{position:absolute;left:36px;bottom:36px;width:min(570px,calc(100vw - 480px));padding:20px 24px;border:1px solid #a0c5d72b;border-radius:12px;background:#091a28e8;backdrop-filter:blur(18px);box-shadow:0 10px 60px #030b1470}
+.st-story-stage{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#91cbbd;font-size:11px;letter-spacing:1px}.st-story-stage b{font-weight:500}.st-story-stage span{color:#b9cbd5;font-size:11px;white-space:nowrap}.st-story-caption p{font-size:18px;line-height:1.65;margin:14px 0 19px;min-height:56px}
+.st-story-progress{height:2px;background:#7da4b430;margin:12px 0 18px}.st-story-progress i{display:block;height:100%;background:#a2dcc6;width:0}.st-story-choices{display:flex;gap:8px;pointer-events:auto}.st-story-caption>small{display:block;color:#91a9b9;font-size:11px;line-height:1.7;margin-top:14px}
+.st-story-matrix{position:absolute;top:156px;left:36px;width:260px;padding:16px;border-radius:10px;background:#0b1b29dd;border:1px solid #7fa0b22b}.st-story-matrix[hidden]{display:none}.st-story-matrix>small{font-size:11px;color:#9db8c7}.st-story-matrix [data-story-matrix]{display:grid;gap:5px;margin-top:10px}.st-story-matrix [data-story-matrix]>div{padding:6px 8px;border:1px solid transparent;border-radius:5px;font-size:10px;color:#b5c6d0}.st-story-matrix .current{border-color:#77b99c!important;background:#284a3c90}.st-story-matrix small{display:block;color:#7d9cae;font-size:9px;margin-top:3px}
+@media(max-width:900px){.st-story-header{padding:18px;gap:10px}.st-story-header h2{font-size:22px}.st-story-header small{letter-spacing:1px;font-size:8px}.st-story-controls{gap:4px}.st-story-controls button{padding:7px 8px;font-size:10px}.st-story-caption{left:18px;bottom:120px;width:min(540px,calc(100vw - 36px));padding:14px 16px}.st-story-caption p{font-size:15px;margin:9px 0;min-height:44px}.st-story-caption>small{font-size:10px}.st-story-choices button{font-size:10px;padding:7px 9px}.st-story-matrix{top:130px;left:18px;width:220px}.st-story-matrix [data-story-matrix]{grid-template-columns:repeat(3,1fr)}.st-story-matrix [data-story-matrix]>div{font-size:9px;padding:4px}.st-story-matrix small{font-size:8px}}
+
+body[data-station-story] :is(#co-scene-nav,#co-robot-labels,#collaboration-open,#character-assets-open,#co-scene-markers){display:none!important}
+body[data-station-story][data-co-chat] #co-observation-chat{left:auto;right:28px;bottom:28px;width:350px;max-width:calc(100vw - 56px);background:#0b1b29e8}
+body[data-station-story][data-co-chat] #co-observation-log{max-height:130px}
+@media(max-width:900px){body[data-station-story][data-co-chat] #co-observation-chat{left:18px;right:18px;bottom:16px;width:auto;max-width:none}body[data-station-story][data-co-chat] #co-observation-log{max-height:64px}.st-story-caption{bottom:150px}.st-story-header p{max-width:230px;font-size:10px}}
+
+body[data-station-story] #co-chat-pin{display:none}
+
+.st-story-matrix{left:auto;right:36px;width:350px}.st-story-matrix [data-story-matrix]{grid-template-columns:repeat(3,minmax(0,1fr))}.st-story-matrix [data-story-matrix]>div{min-height:65px;line-height:1.5}.st-story-matrix small{line-height:1.5}
+@media(max-width:900px){.st-story-matrix{top:126px;left:18px;right:18px;width:auto;padding:9px}.st-story-matrix [data-story-matrix]>div{min-height:46px}.st-story-matrix [data-story-matrix]{margin-top:5px}}

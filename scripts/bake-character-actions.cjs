@@ -1,0 +1,26 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path');
+const vendor=path.resolve(__dirname,'..','js','vendor','three-r128','build','three.min.js');
+const T=require(vendor),MotionRig=require('../js/character-motion.js')(T);
+const STATES=['idle','walk','run','stairs','sit','typing','sit-talk','sit-phone','talk','phone','pull','grab','bite','chase','struggle','turn','recover','hit','dead','down'];
+function read(buffer){if(buffer.toString('ascii',0,4)!=='glTF')throw Error('需要 GLB 2.0 文件。');const jsonLength=buffer.readUInt32LE(12),json=JSON.parse(buffer.toString('utf8',20,20+jsonLength).trim()),binOffset=20+jsonLength;return{json,bin:buffer.subarray(binOffset+8,binOffset+8+buffer.readUInt32LE(binOffset))};}
+function sceneFrom(json){const joints=new Set((json.skins||[]).flatMap(s=>s.joints)),nodes=json.nodes.map((n,i)=>{const o=joints.has(i)?new T.Bone():new T.Object3D();o.name=n.name||'node'+i;if(n.matrix)new T.Matrix4().fromArray(n.matrix).decompose(o.position,o.quaternion,o.scale);else{if(n.translation)o.position.fromArray(n.translation);if(n.rotation)o.quaternion.fromArray(n.rotation);if(n.scale)o.scale.fromArray(n.scale);}return o;});json.nodes.forEach((n,i)=>(n.children||[]).forEach(c=>nodes[i].add(nodes[c])));const scene=new T.Group();for(const i of json.scenes?.[json.scene||0]?.nodes||[])scene.add(nodes[i]);scene.updateMatrixWorld(true);const box=new T.Box3();json.nodes.forEach((n,i)=>{if(n.mesh===undefined)return;for(const p of json.meshes[n.mesh].primitives){const a=json.accessors[p.attributes.POSITION];if(a.min&&a.max)box.union(new T.Box3(new T.Vector3(...a.min),new T.Vector3(...a.max)).applyMatrix4(nodes[i].matrixWorld));}});return{scene,nodes,bones:[...joints].map(i=>nodes[i]),height:box.getSize(new T.Vector3()).y};}
+function bake(input,output){
+  const {json,bin}=read(fs.readFileSync(input)),{scene,nodes,bones,height}=sceneFrom(json),rig=new MotionRig(scene,bones,height),chunks=[Buffer.from(bin)],indexByBone=new Map(nodes.map((b,i)=>[b,i]));let offset=bin.length;
+  json.bufferViews??=[];json.accessors??=[];json.animations=[];
+  function append(values,type,min,max){const padding=(4-offset%4)%4;if(padding){chunks.push(Buffer.alloc(padding));offset+=padding;}const buffer=Buffer.from(new Float32Array(values).buffer),view=json.bufferViews.length;json.bufferViews.push({buffer:0,byteOffset:offset,byteLength:buffer.length});chunks.push(buffer);offset+=buffer.length;const i=json.accessors.length;json.accessors.push({bufferView:view,componentType:5126,count:values.length/({SCALAR:1,VEC3:3,VEC4:4}[type]),type,...(min?{min,max}:{})});return i;}
+  const frameCount=61,times=Array.from({length:frameCount},(_,i)=>i/30),timeAccessor=append(times,'SCALAR',[0],[2]);
+  for(const state of STATES){const rotations=bones.map(()=>[]),positions=bones.map(()=>[]),animation={name:'pose:'+state,channels:[],samplers:[]};
+    for(const t of times){rig.pose(state,t);bones.forEach((b,i)=>{rotations[i].push(...b.quaternion.toArray());positions[i].push(...b.position.toArray());});}
+    function channel(bi,values,dim,type,target){const rest=values.slice(0,dim),varies=values.some((v,i)=>Math.abs(v-rest[i%dim])>1e-6);if(!varies)return;const outputAccessor=append(values,type),sampler=animation.samplers.length;animation.samplers.push({input:timeAccessor,output:outputAccessor,interpolation:'LINEAR'});animation.channels.push({sampler,target:{node:indexByBone.get(bones[bi]),path:target}});}
+    bones.forEach((b,i)=>{channel(i,rotations[i],4,'VEC4','rotation');channel(i,positions[i],3,'VEC3','translation');});
+    // A constant pose still needs its different-from-rest bones in the clip.
+    const at0=(()=>{rig.pose(state,0);return bones.map(b=>({q:b.quaternion.toArray(),p:b.position.toArray()}));})();
+    rig.reset();bones.forEach((b,i)=>{for(const [target,dim,type,base,posed]of [['rotation',4,'VEC4',b.quaternion.toArray(),at0[i].q],['translation',3,'VEC3',b.position.toArray(),at0[i].p]]){if(animation.channels.some(c=>c.target.node===indexByBone.get(b)&&c.target.path===target)||!posed.some((v,k)=>Math.abs(v-base[k])>1e-6))continue;const sampler=animation.samplers.length;animation.samplers.push({input:timeAccessor,output:append(Array.from({length:frameCount},()=>posed).flat(),type),interpolation:'LINEAR'});animation.channels.push({sampler,target:{node:indexByBone.get(b),path:target}});}});
+    json.animations.push(animation);
+  }
+  json.buffers[0].byteLength=offset;json.asset.extras={...json.asset.extras,animationSource:'AI Agent Society anatomical bone adaptation',sourceService:'Lux3D China',fps:30};
+  let jb=Buffer.from(JSON.stringify(json));jb=Buffer.concat([jb,Buffer.alloc((4-jb.length%4)%4,32)]);let bb=Buffer.concat(chunks);bb=Buffer.concat([bb,Buffer.alloc((4-bb.length%4)%4)]);const out=Buffer.alloc(12+8+jb.length+8+bb.length);out.write('glTF');out.writeUInt32LE(2,4);out.writeUInt32LE(out.length,8);out.writeUInt32LE(jb.length,12);out.write('JSON',16);jb.copy(out,20);out.writeUInt32LE(bb.length,20+jb.length);out.write('BIN\0',24+jb.length);bb.copy(out,28+jb.length);fs.writeFileSync(output+'.part',out);fs.renameSync(output+'.part',output);
+  return{source:'local-adaptation',actions:STATES.map(s=>'pose:'+s),joints:bones.length,clips:json.animations.map(a=>({name:a.name,channels:a.channels.length})),bytes:out.length,height};
+}
+module.exports={bake,read,sceneFrom,STATES};

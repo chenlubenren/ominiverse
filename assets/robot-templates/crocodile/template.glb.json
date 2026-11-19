@@ -1,0 +1,37 @@
+{
+  "bones": 31,
+  "vertices": 292,
+  "unweighted": 0,
+  "animations": {
+    "attack": {
+      "frames": [
+        0.0,
+        15.0
+      ],
+      "sampleDeformation": 1.2510471946622916
+    },
+    "death": {
+      "frames": [
+        0.0,
+        16.0
+      ],
+      "sampleDeformation": 2.4348076109109655
+    },
+    "idle-loop": {
+      "frames": [
+        0.0,
+        31.0
+      ],
+      "sampleDeformation": 0.2721327771891413
+    },
+    "walk-loop": {
+      "frames": [
+        0.0,
+        16.0
+      ],
+      "sampleDeformation": 0.5559526240611184
+    }
+  },
+  "source": "CC0 br-n518 crocodile",
+  "mode": "template"
+}

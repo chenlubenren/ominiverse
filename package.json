@@ -1,0 +1,52 @@
+{
+  "name": "ai-agent-society",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive building and orbital station simulation with human and robot agents",
+  "scripts": {
+    "start": "node server.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@manycore/aholo-sdk-asset": "1.4.0",
+    "playwright": "1.62.1"
+  },
+  "devDependencies": {
+    "sharp": "0.35.5"
+  },
+  "files": [
+    "index.html",
+    "asset-studio.html",
+    "station-designs.html",
+    "*.css",
+    "server.cjs",
+    "requirements-usd.txt",
+    "js/",
+    "assets/",
+    "docs/部署.md",
+    "docs/公网运维.md",
+    "deploy/",
+    "scripts/local-config.cjs",
+    "scripts/usdz-service.cjs",
+    "scripts/convert_usdz.py",
+    "scripts/lux3d-service.cjs",
+    "scripts/lux3d-key.cjs",
+    "scripts/character-service.cjs",
+    "scripts/lux3d-characters.cjs",
+    "scripts/lux3d-population.cjs",
+    "scripts/bake-character-actions.cjs",
+    "scripts/transfer-character-rig.cjs",
+    "scripts/robot-service.cjs",
+    "scripts/robot-provider.cjs",
+    "scripts/robot-deepseek-provider.cjs",
+    "scripts/disaster-service.cjs",
+    "scripts/event-provider-key.cjs",
+    "scripts/robot-library-service.cjs",
+    "scripts/robot-articulation.cjs",
+    "scripts/robot-cloud-rig.py",
+    "scripts/robot-skinning.py",
+    "scripts/robot-urdf-rig.py"
+  ]
+}

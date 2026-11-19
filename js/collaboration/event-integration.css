@@ -1,0 +1,25 @@
+/* Optional controls share the existing white/blue interface; no scene overrides. */
+#co-event-dialog{width:min(650px,calc(100vw - 28px));max-height:88dvh;box-sizing:border-box;overflow:auto;border:1px solid #d3e2f2;border-radius:14px;padding:24px;background:#f8fbff;color:#44627a;font:12px/1.65 'Microsoft YaHei',sans-serif;box-shadow:0 20px 80px #294a6c30}
+#co-event-dialog::backdrop{background:#19355232;backdrop-filter:blur(5px)}
+#co-event-dialog h2{font-size:20px;margin:4px 0;color:#254f73}#co-event-dialog small{color:#8a9eb4;font-size:10px}
+#co-event-dialog .co-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}#co-event-dialog .co-close{flex:none;min-width:32px;min-height:32px;padding:2px}
+#co-event-dialog .co-panel-actions{flex-wrap:wrap}#co-event-examples{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+#co-event-examples button{padding:10px;text-align:left;background:#fff;border:1px solid #dce7f2;color:#44627a;border-radius:6px;font:11px/1.5 'Microsoft YaHei',sans-serif;cursor:pointer}
+#co-event-dialog button:disabled{opacity:.45;cursor:default}#co-event-scope{color:#7b96b0}#co-event-stats{background:#eaf3fb;padding:12px;border-radius:8px}
+.co-event-cloud{display:flex;align-items:center;gap:8px;margin:18px 0 0}#co-event-appearance{border-top:1px solid #deebf7;padding-top:12px;margin-top:18px}#co-event-appearance summary{cursor:pointer}#co-event-appearance label{display:flex;gap:10px;align-items:center;margin-top:12px}#co-event-appearance select{flex:1;padding:7px;color:inherit;background:white;border:1px solid #d3e2f2;border-radius:5px}
+#co-event-dialog .air-experiment-metrics{font-size:11px;margin-top:15px}#co-event-dialog .air-progress-title,#co-event-dialog .air-metrics{display:flex;justify-content:space-between;gap:12px}#co-event-dialog progress{width:100%;accent-color:#2589df}#co-event-dialog .air-floor-row{display:grid;grid-template-columns:30px 1fr 60px;align-items:center;gap:8px;margin:5px 0}
+#co-event-dialog #virus-lifetime-control{display:block;margin-top:12px}#co-event-dialog #virus-lifetime-control[hidden],#co-event-dialog [hidden]{display:none!important}
+#co-event-shortcut{position:absolute;right:14px;bottom:9px;height:20px;border:0;background:transparent;color:inherit;text-shadow:inherit;font:10px 'Microsoft YaHei',sans-serif;cursor:pointer;padding:3px 0;margin:0}
+#co-event-population{position:absolute;left:14px;top:8px;max-width:calc(50% - 42px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block;border:0;background:transparent;color:#fff;text-shadow:inherit;font:10px/1.6 'Microsoft YaHei',sans-serif;cursor:pointer;padding:0;text-align:left}
+#co-chat-resize{grid-area:1/1;display:block;justify-self:center;width:52px;height:14px;padding:0;margin:0;border:0;background:transparent;cursor:ns-resize;touch-action:none}#co-chat-resize span{display:block;width:28px;height:2px;margin:auto;background:#ffffff50;border-radius:2px}
+#collaboration-panel .co-panel-actions{flex-wrap:wrap}
+@media(max-width:600px){#co-event-dialog{padding:18px}#co-event-examples{grid-template-columns:1fr}#co-event-population{font-size:9px}}
+
+/* F hides scene controls in every environment; chat and open dialogs stay usable. */
+body.menus-hidden :is(
+  .app-header,.control-panel,.results-panel,.stage-toolbar,.stage-caption,.stage-badge,.stage-bottom,.playback-bar,.method-note,
+  #building-ui,#building-floor-sidebar,#matrix-status,#interior-building-bar,#building-theme-switch,#character-assets-open,
+  #collaboration-open,#co-scene-nav,#co-environment-ui,#station-ui,
+  #first-person-hud,#journey-panel,#exploration-hud,
+  .st-story-ui,.st-film-ui,.st-matrix-ui,.st-short-ui
+){display:none!important}

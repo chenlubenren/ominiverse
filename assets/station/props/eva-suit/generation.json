@@ -1,0 +1,16 @@
+{
+  "prompt": "One realistic white EVA astronaut spacesuit standing upright on its boots, empty gold reflective helmet visor, bulky padded textile torso, ribbed joints, control box on chest, hoses, gloves and life support backpack. Isolated full body equipment.",
+  "seed": 23,
+  "service": "http://127.0.0.1:7861",
+  "generator": "local TRELLIS-text-xlarge",
+  "samplingSteps": 25,
+  "seconds": 29.44,
+  "textureSize": 2048,
+  "sha256": "af74bd7ee8e59a9ef9f4532a52c368319760724854578bef7437ed835c4ef84b",
+  "bytes": 5119196,
+  "visualReview": "accepted: four-view silhouette and texture inspection",
+  "trianglesOriginal": 21015,
+  "trianglesInterior": 10045,
+  "postprocess": "removed lowest 6.5% EVA display plinth, retained texture UVs",
+  "interiorSha256": "76fd4363c826ec2674e7e4babab7350e80f4fe47396e96661a425c9007696345"
+}

@@ -1,0 +1,381 @@
+{
+  "source": "中国空间站天宫建模.3dm",
+  "sourceSha256": "e4d82cab27ac4ce2170009f5b5b88e94f3496dcbb8e5da9eddc1a6c94d2f1bc8",
+  "sourceBrepObjects": 1572,
+  "sourceCachedPolygonFaces": 1471002,
+  "triangles": 2164878,
+  "vertices": 1412444,
+  "drawBatches": 61,
+  "bytes": 51453604,
+  "coordinateTransform": "world = (-source.y, source.z, -source.x) * 0.03; visualization scale, not certified physical dimensions",
+  "segmentation": "Eight interpretive cabin zones classified by source object bounding-box centers",
+  "meshSimplification": false,
+  "batches": [
+    {
+      "module": "tianzhou",
+      "layer": 0,
+      "vertices": 69764,
+      "triangles": 125626
+    },
+    {
+      "module": "tianhe",
+      "layer": 0,
+      "vertices": 52231,
+      "triangles": 60408
+    },
+    {
+      "module": "node",
+      "layer": 0,
+      "vertices": 17687,
+      "triangles": 30418
+    },
+    {
+      "module": "tianzhou",
+      "layer": 6,
+      "vertices": 896,
+      "triangles": 868
+    },
+    {
+      "module": "mengtian",
+      "layer": 6,
+      "vertices": 27776,
+      "triangles": 26900
+    },
+    {
+      "module": "mengtian",
+      "layer": 11,
+      "vertices": 2376,
+      "triangles": 1540
+    },
+    {
+      "module": "shenzhou",
+      "layer": 6,
+      "vertices": 1040,
+      "triangles": 1288
+    },
+    {
+      "module": "wentian",
+      "layer": 6,
+      "vertices": 27904,
+      "triangles": 27024
+    },
+    {
+      "module": "wentian",
+      "layer": 11,
+      "vertices": 2376,
+      "triangles": 1540
+    },
+    {
+      "module": "airlock",
+      "layer": 6,
+      "vertices": 1040,
+      "triangles": 1288
+    },
+    {
+      "module": "wentian",
+      "layer": 13,
+      "vertices": 96,
+      "triangles": 48
+    },
+    {
+      "module": "wentian",
+      "layer": 12,
+      "vertices": 1296,
+      "triangles": 856
+    },
+    {
+      "module": "mengtian",
+      "layer": 13,
+      "vertices": 96,
+      "triangles": 48
+    },
+    {
+      "module": "mengtian",
+      "layer": 12,
+      "vertices": 1296,
+      "triangles": 856
+    },
+    {
+      "module": "mengtian",
+      "layer": 7,
+      "vertices": 384,
+      "triangles": 192
+    },
+    {
+      "module": "mengtian",
+      "layer": 8,
+      "vertices": 2112,
+      "triangles": 1056
+    },
+    {
+      "module": "mengtian",
+      "layer": 9,
+      "vertices": 192,
+      "triangles": 96
+    },
+    {
+      "module": "mengtian",
+      "layer": 0,
+      "vertices": 36954,
+      "triangles": 55716
+    },
+    {
+      "module": "wentian",
+      "layer": 7,
+      "vertices": 384,
+      "triangles": 192
+    },
+    {
+      "module": "wentian",
+      "layer": 8,
+      "vertices": 2112,
+      "triangles": 1056
+    },
+    {
+      "module": "wentian",
+      "layer": 9,
+      "vertices": 192,
+      "triangles": 96
+    },
+    {
+      "module": "wentian",
+      "layer": 0,
+      "vertices": 81904,
+      "triangles": 125096
+    },
+    {
+      "module": "node",
+      "layer": 4,
+      "vertices": 13036,
+      "triangles": 23248
+    },
+    {
+      "module": "node",
+      "layer": 16,
+      "vertices": 27642,
+      "triangles": 32376
+    },
+    {
+      "module": "wentian",
+      "layer": 4,
+      "vertices": 41350,
+      "triangles": 67000
+    },
+    {
+      "module": "habitat",
+      "layer": 4,
+      "vertices": 24810,
+      "triangles": 40200
+    },
+    {
+      "module": "mengtian",
+      "layer": 4,
+      "vertices": 31426,
+      "triangles": 50920
+    },
+    {
+      "module": "habitat",
+      "layer": 0,
+      "vertices": 48698,
+      "triangles": 94614
+    },
+    {
+      "module": "shenzhou",
+      "layer": 0,
+      "vertices": 19793,
+      "triangles": 32470
+    },
+    {
+      "module": "airlock",
+      "layer": 4,
+      "vertices": 4962,
+      "triangles": 8040
+    },
+    {
+      "module": "airlock",
+      "layer": 0,
+      "vertices": 25732,
+      "triangles": 43836
+    },
+    {
+      "module": "tianhe",
+      "layer": 4,
+      "vertices": 26464,
+      "triangles": 42880
+    },
+    {
+      "module": "wentian",
+      "layer": 3,
+      "vertices": 27544,
+      "triangles": 28500
+    },
+    {
+      "module": "mengtian",
+      "layer": 3,
+      "vertices": 27544,
+      "triangles": 28500
+    },
+    {
+      "module": "shenzhou",
+      "layer": 15,
+      "vertices": 4520,
+      "triangles": 5008
+    },
+    {
+      "module": "node",
+      "layer": 14,
+      "vertices": 1984,
+      "triangles": 1984
+    },
+    {
+      "module": "wentian",
+      "layer": 5,
+      "vertices": 512,
+      "triangles": 504
+    },
+    {
+      "module": "mengtian",
+      "layer": 5,
+      "vertices": 512,
+      "triangles": 504
+    },
+    {
+      "module": "tianhe",
+      "layer": 5,
+      "vertices": 512,
+      "triangles": 504
+    },
+    {
+      "module": "wentian",
+      "layer": 10,
+      "vertices": 245923,
+      "triangles": 408814
+    },
+    {
+      "module": "mengtian",
+      "layer": 10,
+      "vertices": 264631,
+      "triangles": 423222
+    },
+    {
+      "module": "mengtian",
+      "layer": 14,
+      "vertices": 20835,
+      "triangles": 37586
+    },
+    {
+      "module": "tianzhou",
+      "layer": 4,
+      "vertices": 6616,
+      "triangles": 10720
+    },
+    {
+      "module": "wentian",
+      "layer": 17,
+      "vertices": 101926,
+      "triangles": 161612
+    },
+    {
+      "module": "wentian",
+      "layer": 14,
+      "vertices": 23017,
+      "triangles": 42418
+    },
+    {
+      "module": "shenzhou",
+      "layer": 14,
+      "vertices": 8936,
+      "triangles": 16464
+    },
+    {
+      "module": "habitat",
+      "layer": 16,
+      "vertices": 2638,
+      "triangles": 2868
+    },
+    {
+      "module": "tianzhou",
+      "layer": 1,
+      "vertices": 9145,
+      "triangles": 12290
+    },
+    {
+      "module": "tianzhou",
+      "layer": 2,
+      "vertices": 10644,
+      "triangles": 12320
+    },
+    {
+      "module": "wentian",
+      "layer": 2,
+      "vertices": 6022,
+      "triangles": 6294
+    },
+    {
+      "module": "tianhe",
+      "layer": 2,
+      "vertices": 2316,
+      "triangles": 2924
+    },
+    {
+      "module": "mengtian",
+      "layer": 2,
+      "vertices": 6022,
+      "triangles": 6294
+    },
+    {
+      "module": "habitat",
+      "layer": 2,
+      "vertices": 4782,
+      "triangles": 5038
+    },
+    {
+      "module": "habitat",
+      "layer": 1,
+      "vertices": 5426,
+      "triangles": 7148
+    },
+    {
+      "module": "mengtian",
+      "layer": 1,
+      "vertices": 6184,
+      "triangles": 8144
+    },
+    {
+      "module": "wentian",
+      "layer": 1,
+      "vertices": 6943,
+      "triangles": 9168
+    },
+    {
+      "module": "shenzhou",
+      "layer": 2,
+      "vertices": 6688,
+      "triangles": 6644
+    },
+    {
+      "module": "shenzhou",
+      "layer": 1,
+      "vertices": 8502,
+      "triangles": 11198
+    },
+    {
+      "module": "airlock",
+      "layer": 2,
+      "vertices": 3424,
+      "triangles": 4156
+    },
+    {
+      "module": "airlock",
+      "layer": 1,
+      "vertices": 2370,
+      "triangles": 3132
+    },
+    {
+      "module": "tianhe",
+      "layer": 1,
+      "vertices": 2305,
+      "triangles": 3128
+    }
+  ]
+}

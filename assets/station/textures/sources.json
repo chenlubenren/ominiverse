@@ -1,0 +1,48 @@
+[
+  {
+    "file": "equipment-panel.jpg",
+    "source": "3d66Model-17721496-files-001.png",
+    "normalizedCrop": [
+      0.028,
+      0.004,
+      0.862,
+      0.439
+    ]
+  },
+  {
+    "file": "instrument-controls.jpg",
+    "source": "3d66Model-17721496-files-001.png",
+    "normalizedCrop": [
+      0.447,
+      0.639,
+      0.862,
+      0.942
+    ]
+  },
+  {
+    "file": "brushed-metal.jpg",
+    "source": "3d66Model-17721496-files-050.jpg",
+    "normalizedCrop": null
+  },
+  {
+    "file": "brushed-metal-roughness.jpg",
+    "source": "3d66Model-17721496-files-051.jpg",
+    "normalizedCrop": null
+  },
+  {
+    "file": "fabric-color.jpg",
+    "source": "assets/archviz/fabric-color.jpg"
+  },
+  {
+    "file": "fabric-normal.jpg",
+    "source": "assets/archviz/fabric-normal.jpg"
+  },
+  {
+    "file": "fabric-rough.jpg",
+    "source": "assets/archviz/fabric-rough.jpg"
+  },
+  {
+    "file": "fabric-color.jpg",
+    "processing": "warm-white luminance remapping and overlaid quilting stitches"
+  }
+]

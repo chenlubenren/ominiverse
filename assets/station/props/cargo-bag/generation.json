@@ -1,0 +1,16 @@
+{
+  "prompt": "A single rectangular spacecraft cargo transfer bag, off-white woven padded fabric, rounded soft corners, black nylon compression straps, stitched seams, zipper, webbing carry handles, small label pocket. Photorealistic worn textile, isolated object.",
+  "seed": 71,
+  "service": "http://127.0.0.1:7861",
+  "generator": "local TRELLIS-text-xlarge",
+  "samplingSteps": 25,
+  "seconds": 26.57,
+  "textureSize": 2048,
+  "sha256": "1f7bd6d7fda452af91f43800c4eb7e89600f7c63663aa5977ee658fc4affcbd7",
+  "bytes": 4960848,
+  "visualReview": "accepted: four-view silhouette and texture inspection",
+  "trianglesOriginal": 13440,
+  "trianglesInterior": 13440,
+  "postprocess": "smooth normals across UV seams; retained UVs and all faces",
+  "interiorSha256": "29f0d26b81f9fdb6baf72915b2c3f606ac9312ad9a439e37316d3b1c48d046bb"
+}

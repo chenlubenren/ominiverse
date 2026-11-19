@@ -1,0 +1,9 @@
+/* Preserve requested anatomy; every generated character has a mechanical design. */
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.RobotGenerationPlan=api;})(typeof window==='undefined'?globalThis:window,()=>{
+ function size(text){const s=String(text||'').replace(/(?:不是|不要|不用|不需要)\s*(?:超大型|大型|巨型|巨构|中型|小型|微型|迷你)/g,'');const hits=[...s.matchAll(/超大型|大型|巨型|巨构|巨大|中型|中等|中号|中尺寸|小型|微型|迷你|小号|小尺寸|大号|大尺寸|\b(?:small|mini|medium|large|giant|huge)\b/gi)];if(!hits.length)return null;return /小型|微型|迷你|小号|小尺寸|small|mini/i.test(hits.at(-1)[0])?'small':/中型|中等|中号|中尺寸|medium/i.test(hits.at(-1)[0])?'medium':'giant';}
+ function plan({prompt='',name='',sizeClass='auto'}={}){const text=prompt.trim()||name.trim(),bodyPlan=/基多拉|ghidorah|飞龙|翼龙|dragon|翅膀|wings|章鱼|八爪|octopus|蜘蛛|spider|巨蛇|蛇形|serpent|snake|无人机|drone|四足|quadruped|机器狗|robot dog/i.test(text)&&!/鳄鱼|crocodile|alligator/i.test(text)?'articulated':/鳄鱼|crocodile|alligator/i.test(text)&&!/双足|两条腿|直立|biped/i.test(text)?'quadruped':/哥斯拉|godzilla|人形|humanoid|双足|两条腿|直立|biped|双手|保安|协作/i.test(text)?'biped':'articulated',motion=/基多拉|ghidorah|飞龙|翼龙|dragon|翅膀|wings|无人机|drone|飞行|fly|flying/i.test(text)?'flight':/章鱼|八爪|octopus|蜘蛛|spider|蛇|snake|serpent|爬行|crawl/i.test(text)?'crawl':'walk',detected=size(prompt)||size(name),chosen=detected||(['small','medium','giant'].includes(sizeClass)?sizeClass:'small');
+  const robotStyle='所有角色默认生成机器人版本：完整金属装甲、机械骨骼、可辨识的机械关节、液压或伺服结构、依照用户配色，未指定时使用白蓝主题和蓝色能量灯、真实不透明 PBR 金属材质。保留用户指定的物种轮廓、头部数量、翅膀、触手、四肢和尾部；不要把非人形角色改成人形，不生成生物皮肤或血肉。';
+  return{bodyPlan,motion,sizeClass:chosen,robotStyle,name:name.trim()||prompt.replace(/^(?:请|帮我|给我|生成|制作|打造|create|generate|make|a |an |一个|一只|一台|\s)+/gi,'').trim().slice(0,40)||'我的机器人',prompt:prompt.trim()};
+ }
+ return{size,plan};
+});

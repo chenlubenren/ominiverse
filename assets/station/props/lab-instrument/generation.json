@@ -1,0 +1,16 @@
+{
+  "prompt": "One compact benchtop laboratory analyzer, ivory painted metal enclosure, black front control panel, small dark display, physical knobs and buttons, ventilation slots, brushed steel sample tray. Photorealistic scientific instrument, isolated object.",
+  "seed": 37,
+  "service": "http://127.0.0.1:7861",
+  "generator": "local TRELLIS-text-xlarge",
+  "samplingSteps": 25,
+  "seconds": 32.6,
+  "textureSize": 2048,
+  "sha256": "a39a1f668b83d03af585dbc4c959c7db7f3f15b536e516b907161e86231dcc1e",
+  "bytes": 4489260,
+  "visualReview": "accepted: four-view silhouette and texture inspection",
+  "trianglesOriginal": 40915,
+  "trianglesInterior": 40915,
+  "postprocess": "smooth normals across UV seams; retained UVs and all faces",
+  "interiorSha256": "21fcaef88708904c9d01982e72a9a91fc44f7811a644031959b73999c18abb19"
+}

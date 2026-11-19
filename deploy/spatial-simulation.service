@@ -1,0 +1,29 @@
+[Unit]
+Description=Spatial simulation web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=spatial-sim
+Group=spatial-sim
+WorkingDirectory=/opt/spatial-simulation/current
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=8910
+Environment=BLENDER_PATH=/usr/local/bin/blender
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-/etc/spatial-simulation.env
+ExecStart=/usr/local/bin/node server.cjs
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/spatial-simulation/shared
+
+[Install]
+WantedBy=multi-user.target

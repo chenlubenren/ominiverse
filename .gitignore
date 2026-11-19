@@ -1,0 +1,39 @@
+# Installed dependencies and generated or private application data.
+node_modules/
+.runtime/
+.cache/
+output/
+.playwright-cli/
+__pycache__/
+*.pyc
+*.log
+
+# Local configuration and credentials. Only the empty example is public.
+.env
+.env.*
+!.env.example
+.npmrc
+scripts/local-config.json
+scripts/local-config.local.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.dpapi
+id_rsa
+id_ed25519
+
+# Database, backup, and local export files.
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.backup
+*.tgz
+*.tar
+*.tar.gz
+*.zip
+*.7z
+*.baiduyun.uploading.cfg
+.DS_Store
+Thumbs.db

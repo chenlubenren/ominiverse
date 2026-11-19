@@ -1,0 +1,57 @@
+/* Standalone exterior design review. No cabin topology or daily simulation. */
+(() => {
+  'use strict';
+  const T=THREE,K=StationShellKit,$=id=>document.getElementById(id),definitions=StationConcepts,cache=new Map(),viewport=$('shell-viewport');
+  const scene=new T.Scene(),camera=new T.PerspectiveCamera(35,1,.1,1600),renderer=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.setClearColor(0x000000,0);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;viewport.appendChild(renderer.domElement);
+  const controls=new T.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.09;controls.minDistance=8;controls.maxDistance=400;controls.autoRotateSpeed=.6;
+  const hemisphere=new T.HemisphereLight('#dceef8','#2f3b4a',.65);scene.add(hemisphere);
+  const key=new T.DirectionalLight('#ffeddb',2.0);key.position.set(-45,65,70);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-45,right:45,top:45,bottom:-45,near:1,far:220});key.shadow.bias=-.00015;key.shadow.normalBias=.04;scene.add(key);
+  const fill=new T.DirectionalLight('#a6cce8',.65);fill.position.set(50,20,30);scene.add(fill);
+  const rim=new T.DirectionalLight('#7ea6c7',1.5);rim.position.set(20,15,-60);scene.add(rim);
+  // A soft studio environment gives metal and glass depth without hiding the silhouette.
+  const env=new T.Scene();env.background=new T.Color('#617184');const white=new T.MeshBasicMaterial({color:'#e3eaf0',side:T.BackSide}),dim=new T.MeshBasicMaterial({color:'#4a596b',side:T.BackSide});
+  for(const [size,pos,mat]of [[[80,35,3],[-30,45,10],white],[[25,90,3],[60,0,-30],white],[[60,25,3],[0,-45,25],dim]]){const panel=new T.Mesh(new T.BoxGeometry(...size),mat);panel.position.set(...pos);panel.lookAt(0,0,0);env.add(panel);}
+  const pmrem=new T.PMREMGenerator(renderer),environment=pmrem.fromScene(env,.08);scene.environment=environment.texture;pmrem.dispose();env.traverse(o=>o.geometry?.dispose());white.dispose();dim.dispose();for(const m of Object.values(K.materials))m.envMapIntensity=.4;
+  let active=null,index=0,currentPose='perspective',ready=false,thumbBusy=false,noticeTimer,currentFilter='all';
+  const isModular=d=>d.id==='kepler'||['舱体组合','常规变体'].includes(d.category);
+  $('collection-count').textContent=String(definitions.length).padStart(2,'0')+' STUDIES';$('collection-footer').textContent=definitions.length+' 套外壳 · 独立三维模型 · 可自由阅览';
+  for(const button of document.querySelectorAll('[data-filter]'))button.querySelector('span').textContent=definitions.filter(d=>button.dataset.filter==='all'||isModular(d)===(button.dataset.filter==='modular')).length;
+  function notify(message){$('notice').hidden=false;$('notice').textContent=message;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>$('notice').hidden=true,3000);}
+  function modelFor(i){if(!cache.has(i)){const model=K.batch(definitions[i].build(K));model.name=definitions[i].id;model.visible=false;scene.add(model);cache.set(i,model);}return cache.get(i);}
+  function fit(pose=currentPose){
+    if(!active)return;currentPose=pose;document.querySelectorAll('[data-pose]').forEach(b=>b.classList.toggle('active',b.dataset.pose===pose));
+    active.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(active),center=bounds.getCenter(new T.Vector3()),direction=new T.Vector3(...(pose==='top'?[0,1,.001]:pose==='front'?[0,.04,1]:definitions[index].view||[1,.7,1.2])).normalize(),right=new T.Vector3().crossVectors(new T.Vector3(0,1,0),direction).normalize(),up=new T.Vector3().crossVectors(direction,right).normalize();
+    const rect=viewport.getBoundingClientRect(),info=document.querySelector('.model-info').getBoundingClientRect(),tools=document.querySelector('.view-controls').getBoundingClientRect(),left=-.88,rightEdge=.88,top=1-2*(tools.bottom-rect.top+20)/rect.height,bottom=1-2*(info.top-rect.top-23)/rect.height,cx=0,cy=(top+bottom)/2,hx=(rightEdge-left)/2,hy=Math.max(.12,(top-bottom)/2),tan=Math.tan(camera.fov*Math.PI/360);
+    let distance=6;const corner=new T.Vector3();active.traverse(mesh=>{if(!mesh.isMesh)return;const vertices=mesh.geometry.attributes.position;for(let i=0;i<vertices.count;i++){corner.fromBufferAttribute(vertices,i).applyMatrix4(mesh.matrixWorld).sub(center);const d=corner.dot(direction),px=corner.dot(right)/(tan*camera.aspect),py=corner.dot(up)/tan;distance=Math.max(distance,Math.abs(px)/hx+d,Math.abs(py)/hy+d);}});
+    const radius=bounds.getBoundingSphere(new T.Sphere()).radius;if(controls.autoRotate)distance=Math.max(distance,radius/Math.sin(Math.atan(Math.min(hx*tan*camera.aspect,hy*tan))));
+    distance*=1.04;camera.setViewOffset(rect.width,rect.height,-cx*rect.width/2,cy*rect.height/2,rect.width,rect.height);camera.up.set(0,1,0);camera.position.copy(center).addScaledVector(direction,distance);controls.target.copy(center);controls.maxDistance=distance*3;controls.minDistance=radius*.5;controls.update();renderer.render(scene,camera);
+  }
+  function select(next,updateUrl=true){
+    index=(next+definitions.length)%definitions.length;if(active)active.visible=false;active=modelFor(index);active.visible=true;const d=definitions[index];if(currentFilter!=='all'&&isModular(d)!==(currentFilter==='modular'))filter('all');
+    $('model-counter').textContent=d.index+' / '+String(definitions.length).padStart(2,'0');$('model-category').textContent=d.category;$('model-code').textContent='STUDY '+d.index+' / '+d.id.toUpperCase();
+    $('model-name').replaceChildren(document.createTextNode(d.name));const subtitle=document.createElement('small');subtitle.textContent=d.subtitle;$('model-name').append(subtitle);$('model-description').textContent=d.description;$('model-features').replaceChildren(...d.features.map(text=>{const s=document.createElement('span');s.textContent=text;return s;}));
+    document.querySelectorAll('[data-concept]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.concept)===index)));
+    if(updateUrl)history.replaceState(null,'','#'+d.id);renderer.shadowMap.needsUpdate=true;fit('perspective');$('loading').hidden=true;ready=true;
+  }
+  function resize(){const r=viewport.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();fit();}
+  const observer=new ResizeObserver(resize);observer.observe(viewport);
+  const cards=definitions.map((d,i)=>{const button=document.createElement('button');button.className='concept-card';button.dataset.concept=i;button.setAttribute('aria-label',d.name+' · '+d.subtitle);button.setAttribute('aria-pressed','false');const thumb=document.createElement('span');thumb.className='thumb';const img=document.createElement('img');img.alt=d.name+'外壳三维预览';const number=document.createElement('span');number.textContent=d.index;thumb.append(img,number);const copy=document.createElement('span');copy.className='card-copy';const title=document.createElement('strong');title.textContent=d.name;const sub=document.createElement('small');sub.textContent=d.subtitle;copy.append(title,sub);button.append(thumb,copy);button.onclick=()=>select(i);$('concept-list').append(button);return button;});
+  for(const [i,d]of definitions.entries())if(['舱体组合','常规变体'].includes(d.category)){const badge=document.createElement('em');badge.textContent=d.category==='常规变体'?'参考新增':'新增';cards[i].querySelector('.thumb').append(badge);}
+  function filter(value){currentFilter=value;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===value)));for(const [i,d]of definitions.entries())cards[i].hidden=value!=='all'&&isModular(d)!==(value==='modular');}
+  document.querySelectorAll('[data-filter]').forEach(button=>button.onclick=()=>filter(button.dataset.filter));
+  function thumbnails(){
+    thumbBusy=true;const saved={size:renderer.getSize(new T.Vector2()),ratio:renderer.getPixelRatio(),exposure:renderer.toneMappingExposure};renderer.setPixelRatio(1);renderer.setSize(360,300,false);renderer.toneMappingExposure=1.05;
+    const thumbCamera=new T.PerspectiveCamera(34,1.2,.1,1000);for(let i=0;i<definitions.length;i++){if(active)active.visible=false;const model=modelFor(i);model.visible=true;const sphere=new T.Box3().setFromObject(model).getBoundingSphere(new T.Sphere());thumbCamera.position.copy(sphere.center).addScaledVector(new T.Vector3(...definitions[i].view).normalize(),sphere.radius/Math.sin(17*Math.PI/180)*1.05);thumbCamera.lookAt(sphere.center);renderer.shadowMap.needsUpdate=true;renderer.render(scene,thumbCamera);cards[i].querySelector('img').src=renderer.domElement.toDataURL('image/png');model.visible=false;}
+    renderer.setPixelRatio(saved.ratio);renderer.setSize(saved.size.x,saved.size.y,false);renderer.toneMappingExposure=saved.exposure;if(active)active.visible=true;renderer.shadowMap.needsUpdate=true;thumbBusy=false;fit();
+  }
+  function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+  async function exportModel(){const button=$('download-model');button.disabled=true;try{const model=active.clone();model.visible=true;model.userData={name:definitions[index].name,description:definitions[index].description,type:'Exterior concept model',units:'conceptual'};const data=await new Promise(resolve=>new T.GLTFExporter().parse(model,resolve,{binary:true,onlyVisible:true}));download(new Blob([data],{type:'model/gltf-binary'}),definitions[index].id+'-station.glb');notify('外壳模型已导出');}catch(error){console.error(error);notify('导出失败，请重试');}finally{button.disabled=false;}}
+  $('download-model').onclick=exportModel;$('save-view').onclick=()=>{renderer.render(scene,camera);renderer.domElement.toBlob(blob=>{if(blob)download(blob,definitions[index].id+'-station.png');},'image/png');};
+  $('rotate').onclick=()=>{controls.autoRotate=!controls.autoRotate;$('rotate').setAttribute('aria-pressed',String(controls.autoRotate));fit();};$('fit').onclick=()=>fit('perspective');document.querySelectorAll('[data-pose]').forEach(b=>b.onclick=()=>fit(b.dataset.pose));
+  viewport.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){select(index+1);e.preventDefault();}if(e.key==='ArrowLeft'){select(index-1);e.preventDefault();}});
+  window.addEventListener('hashchange',()=>{const found=definitions.findIndex(d=>d.id===location.hash.slice(1));if(found>=0)select(found,false);});
+  window.StationDesignGallery={definitions,cache,scene,camera,renderer,controls,select,fit,get active(){return active;},get index(){return index;},get ready(){return ready;},exportModel,modelFor};
+  function render(){requestAnimationFrame(render);if(document.hidden||thumbBusy||!active)return;controls.update();renderer.render(scene,camera);}render();
+  try{resize();select(Math.max(0,definitions.findIndex(d=>d.id===location.hash.slice(1))),false);if(isModular(definitions[index])&&index>0)filter('modular');requestAnimationFrame(()=>{try{thumbnails();if(innerWidth>760){const list=$('concept-list'),button=cards[index];list.scrollTop=button.offsetTop-list.offsetTop;}}catch(error){console.error(error);notify('部分缩略图未完成，可点击方案直接查看');}});}catch(error){console.error(error);$('loading').textContent='模型未能加载，请刷新重试。';}
+})();

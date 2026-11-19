@@ -1,0 +1,31 @@
+/* Shared palette tokens are installed by themes.js, including the existing console colors. */
+body{--building-accent:#2589df;--building-strong:#1585e6;--building-dark:#076bc3;--building-ink:#367fae;--building-soft:#e6f1fa;--building-pale:#dcedff;--building-line:#8bc8fa}
+#building-theme-switch{position:fixed;right:30px;top:58px;z-index:90;display:flex;align-items:center;gap:4px;font-family:"Segoe UI","Microsoft YaHei",sans-serif}
+#building-theme-switch button{display:flex;align-items:center;gap:4px;padding:4px 7px;border:1px solid transparent;border-radius:15px;background:#fafafacc;color:#79818b;font-size:9px;line-height:1.2;cursor:pointer;backdrop-filter:blur(10px)}
+#building-theme-switch i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px #00000009}
+#building-theme-switch button[aria-pressed="true"]{color:var(--building-ink);border-color:var(--building-line);background:#ffffffed;box-shadow:0 2px 8px #3030300b}
+#building-theme-switch button:focus-visible{outline:2px solid var(--building-accent);outline-offset:3px}
+.building-edition{transform:translateY(-8px)}
+body[data-building-phase="interior"] #building-theme-switch{top:24px;right:68px}
+body[data-building-phase="interior"] .header-clock,body[data-building-phase="interior"] .header-project{visibility:hidden}
+body[data-building-theme] input{accent-color:var(--building-accent)}
+body[data-building-theme]{color:var(--ink)}
+body[data-building-theme] .play-button,body[data-building-theme] .live-dot,body[data-building-theme] .status-dot,body[data-building-theme] .goal-marker{background:var(--building-accent)}
+body[data-building-theme] .main-nav button.active,body[data-building-theme] .view-tabs button.active,body[data-building-theme] .primary-metric strong,body[data-building-theme] .playback-time b{color:var(--building-accent)}
+body[data-building-theme] .main-nav button.active::after{background:var(--building-accent)}
+body[data-building-theme] .view-tabs button.active,body[data-building-theme] .speed-tabs button.active{background:var(--building-soft)}
+body[data-building-theme] #sparkline{stroke:var(--building-accent)}
+body[data-building-theme] #interior-building-bar,body[data-building-theme] .layer-pills label,body[data-building-theme] .record-tag{border-color:var(--building-line)}
+body[data-building-theme] .profile-key i{background:var(--building-accent)}
+body[data-building-theme] .profile-key span:nth-child(2) i{opacity:.7}
+body[data-building-theme] .profile-key span:nth-child(3) i{opacity:.45}
+@media(max-width:760px){#building-theme-switch{right:12px;top:74px;gap:2px}#building-theme-switch button{font-size:8px;padding:3px 5px;gap:3px}#building-theme-switch i{width:8px;height:8px}.building-edition{transform:translateY(-1px)}body[data-building-phase="interior"] #building-theme-switch{top:24px;right:14px}body[data-building-phase="interior"] .main-nav{visibility:hidden}}
+
+body[data-building-theme] button{transition-property:transform,opacity!important}
+/* Society controls use the active palette and stay separate from floor selection. */
+#society-overview{position:absolute;left:38px;top:245px;width:290px;padding:17px 19px;background:#ffffffb8;border:1px solid #ffffffd9;border-radius:11px;backdrop-filter:blur(16px);color:var(--building-ink);font-family:"Segoe UI","Microsoft YaHei",sans-serif;z-index:5}
+#society-overview>b{display:block;font-size:15px;font-weight:500;margin:9px 0}#society-overview p{font-size:10px;margin:8px 0 12px}#society-overview small{display:block;font-size:9px;line-height:1.8;opacity:.8}.society-rates{display:flex;gap:5px;margin-bottom:10px}.society-rates button{font-size:10px;padding:6px 9px;background:var(--building-soft);color:var(--building-ink);border-radius:5px}.society-rates button[aria-pressed=true]{background:var(--building-accent);color:white}body[data-building-phase=intro] #society-overview{display:none}
+#office-society-panel h2{font-size:15px;color:var(--building-ink);margin:9px 0 16px}#society-summary>strong{font:28px var(--mono);color:var(--building-accent)}#society-summary>span{display:block;font-size:9px;color:var(--muted);margin:5px 0 14px}.society-metrics{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}.society-metrics b{font:22px var(--mono);color:var(--building-ink)}.society-metrics small{font:9px "Microsoft YaHei",sans-serif;display:block;margin-top:4px;color:var(--muted)}.society-lift-row{position:relative;display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:7px;padding:10px;margin:7px 0;overflow:hidden}.society-lift-row i{position:absolute;left:0;bottom:0;width:4px;background:var(--building-accent);transition:height .4s}.society-lift-row b{width:23px;height:23px;text-align:center;line-height:23px;background:var(--building-soft);color:var(--building-accent);border-radius:4px}.society-lift-row span{font:15px var(--mono);color:var(--building-ink)}.society-lift-row small{display:block;font:9px "Microsoft YaHei",sans-serif;color:var(--muted);margin-top:5px}.office-society-mode #crowd-controls,.office-society-mode #model-replace-controls{display:none}.office-society-mode #office-society-panel{display:block}.office-society-mode .stage-caption{max-width:390px}
+@media(max-width:1000px){#society-overview{top:210px;left:22px;width:240px}}@media(max-width:760px){#society-overview{display:none!important}}
+
+.office-society-mode .results-panel>.primary-metric,.office-society-mode .results-panel>.metric-grid,.office-society-mode .results-panel>.result-section:not(#society-activity-panel):not(.event-section){display:none}.society-person{display:block;text-align:left;width:100%;padding:11px 0;border-bottom:1px solid var(--line);color:var(--building-ink)}.society-person>b{display:flex;justify-content:space-between;font-size:11px;font-weight:500}.society-person>b small{font-size:9px;color:var(--muted)}.society-person>span{display:block;font-size:10px;margin-top:6px;color:var(--building-accent)}.society-person>span small{display:block;font-size:8px;color:var(--muted);margin-top:4px}.society-person:hover{background:var(--building-soft)}

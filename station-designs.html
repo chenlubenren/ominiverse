@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>轨道造型室 · 空间站外壳方案</title>
+  <link rel="stylesheet" href="js/station-designs/gallery.css">
+</head>
+<body>
+  <header class="masthead"><a href="/?scene=station" class="wordmark"><span class="orbital-mark" aria-hidden="true">◎</span> 轨道造型室 <small>ORBITAL ATELIER</small></a><a class="back-link" href="/?scene=station">返回空间站 ↗</a></header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">FORM STUDIES / COLLECTION 01</p><h1>从轨道实验室，到星际栖居。</h1></div><p class="intro-note">常规舱体组合与未来构想，独立外壳设计。<br>旋转观察整体轮廓，选择你想继续发展的方向。</p></div>
+    <div class="workspace">
+      <section class="viewer-panel" aria-label="空间站三维外壳阅览">
+        <div id="shell-viewport" tabindex="0" aria-label="三维模型：拖动旋转，滚轮缩放，方向键切换方案"></div>
+        <div class="viewer-caption"><span id="model-counter">01 / 13</span><span class="caption-line"></span><span id="model-category">外壳概念</span></div>
+        <div class="view-controls" role="group" aria-label="模型视角"><button data-pose="perspective" class="active">透视</button><button data-pose="front">正面</button><button data-pose="top">俯视</button><span></span><button id="rotate" aria-pressed="false">自动旋转</button><button id="fit" title="复位并完整显示模型">复位</button></div>
+        <div id="loading" role="status"><span></span>正在构建外壳模型…</div>
+        <div class="model-info"><p id="model-code" class="eyebrow"></p><h2 id="model-name"></h2><p id="model-description"></p><div id="model-features"></div></div>
+        <div class="viewer-hint">拖动旋转 · 滚轮缩放 · 右键平移</div>
+        <div class="export-actions"><button id="save-view" title="保存当前模型视角">保存视图 ↗</button><button id="download-model" title="下载可导入建模软件的三维外壳">下载模型 ↓</button></div>
+      </section>
+      <aside class="collection" aria-label="外壳方案选择"><div class="collection-heading"><h2>外壳方案</h2><span id="collection-count">13 STUDIES</span></div><nav class="collection-filters" aria-label="筛选设计类型"><button data-filter="all" aria-pressed="true">全部 <span>13</span></button><button data-filter="modular" aria-pressed="false">舱体组合 <span>8</span></button><button data-filter="future" aria-pressed="false">未来构想 <span>5</span></button></nav><div id="concept-list" role="group" aria-label="选择设计方案"></div><p class="collection-note">当前为外观概念模型<br>舱内空间在选定方向后继续设计</p></aside>
+    </div>
+    <footer><span id="collection-footer">独立三维外壳 · 可自由阅览</span><span>ORBITAL FORM EXPLORATIONS — 2026</span></footer>
+  </main>
+  <div id="notice" role="status" hidden></div>
+  <script src="js/vendor/three-r128/build/three.min.js"></script>
+  <script src="js/vendor/three-r128/controls/OrbitControls.js"></script>
+  <script src="js/vendor/three-r128/utils/BufferGeometryUtils.js"></script>
+  <script src="js/station-designs/GLTFExporter.js"></script>
+  <script src="js/station-designs/kit.js"></script>
+  <script src="js/station-designs/orbital.js"></script>
+  <script src="js/station-designs/speculative.js"></script>
+  <script src="js/station-designs/modules-research.js"></script>
+  <script src="js/station-designs/modules-logistics.js"></script>
+  <script src="js/station-designs/modules-varied.js"></script>
+  <script src="js/station-designs/modules-vertical.js"></script>
+  <script src="js/station-designs/gallery.js"></script>
+</body>
+</html>

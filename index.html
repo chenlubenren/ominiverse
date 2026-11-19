@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ominispace · 空间全宇宙</title>
+  <link rel="preload" href="assets/characters/clay-male.glb" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="assets/characters/clay-female.glb" as="fetch" crossorigin="anonymous">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23258e82'/%3E%3Ctext x='8' y='25' font-family='sans-serif' font-size='28' fill='white'%3Ea%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="digital-twin.css">
+  <link rel="stylesheet" href="building.css">
+  <link rel="stylesheet" href="building-theme.css">
+  <link rel="stylesheet" href="society.css">
+  <link rel="stylesheet" href="js/collaboration/original-integration.css">
+  <link rel="stylesheet" href="building-focus.css">
+  <link rel="stylesheet" href="js/collaboration/event-integration.css">
+  <link rel="stylesheet" href="robots.css">
+  <link rel="stylesheet" href="robot-systems.css">
+  <link rel="stylesheet" href="robot-library.css">
+  <link rel="stylesheet" href="js/collaboration/station.css">
+  <link rel="stylesheet" href="js/collaboration/station-scenarios.css">
+  <link rel="stylesheet" href="js/collaboration/station-film.css">
+  <link rel="stylesheet" href="js/collaboration/station-film-matrix.css">
+  <link rel="stylesheet" href="js/collaboration/station-short-film.css">
+  <link rel="stylesheet" href="js/collaboration/station-short-matrix.css">
+  <link rel="stylesheet" href="js/collaboration/station-story-labels.css">
+  <link rel="stylesheet" href="js/collaboration/observation-layout.css">
+</head>
+<body data-building-phase="intro" data-building-ready="false">
+  <div id="building-boot" role="status"><span class="boot-mark">a</span><b>SPATIAL SIMULATION</b><small>正在准备办公楼与 Agent 的日常…</small></div>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="空间模拟首页"><span class="brand-mark">◈</span><div><b>SPATIAL SIMULATION</b><small>办公楼日常 · 人群观察与跨层推演</small></div></a>
+    <nav class="main-nav" aria-label="工作模式"><button data-mode="overview" class="active">空间总览<small>SPACE OVERVIEW</small></button><button data-mode="agents">行为模拟<small>AGENT SIMULATION</small></button><button data-mode="analysis">通行热力<small>ACCESS ANALYSIS</small></button><button data-mode="events">事件回溯<small>EVENT INSIGHTS</small></button></nav>
+    <div class="header-project"><span class="live-dot"></span><span id="project-name">Digital Workplace</span><span class="tag">本地运行</span></div>
+    <div class="header-clock"><b id="wall-clock">00:00:00</b><small id="wall-date"></small></div>
+    <button id="help-button" class="quiet-button" title="使用说明">?</button>
+  </header>
+  <main class="workspace">
+    <aside class="control-panel" hidden inert>
+      <div class="panel-intro"><span class="eyebrow">SCENE CONTROL</span><h1>场景与人群</h1><p>模型、身体尺度与行为参数 · 按 F 显示 / 隐藏菜单</p></div>
+      <section class="control-section">
+        <div class="section-heading"><h2>空间模型</h2><span class="step">01</span></div>
+        <select id="demo-preset" aria-label="示例空间"><option value="building" selected>SPATIAL SIMULATION · 30 层办公楼</option><option value="home">标准家庭住宅 · Resident Home</option><option value="home-apartment">开放式小户型 · Open-plan Apartment</option><option value="home-accessible">无障碍双卧住宅 · Accessible Home</option><option value="office">数字化开放办公 · Digital Workplace</option><option value="office-cowork">联合办公空间 · Cowork Studio</option><option value="office-training">培训与项目中心 · Training Center</option></select>
+        <label class="upload-zone" id="drop-zone" tabindex="0" role="button" aria-label="上传室内模型"><input id="model-files" type="file" multiple hidden accept=".obj,.mtl,.stl,.3dm,.3ds,.gltf,.glb,.fbx,.dae,.usdz,.bin,.png,.jpg,.jpeg,.webp,.bmp,.tga"><span class="upload-icon">↥</span><strong>导入室内模型</strong><span>拖入文件或点击选择</span><small>OBJ · STL · 3DM · 3DS · GLB · FBX · USDZ</small></label>
+        <div class="model-info"><span class="file-symbol">▧</span><div><b id="model-name">Resident Home</b><small id="model-meta">可编辑住宅 · 默认场景</small></div><button id="demo-button" class="icon-button" title="重新加载当前示例空间" aria-label="重新加载当前示例空间">↺</button></div>
+        <details class="import-options"><summary>导入设置 <span>单位 / 轴向 / 地面</span></summary><div class="form-grid"><label>模型单位<select id="model-unit"><option value="1">米 m</option><option value="0.001">毫米 mm</option><option value="0.01">厘米 cm</option><option value="0.3048">英尺 ft</option></select></label><label>向上轴<select id="model-up"><option value="auto">按格式自动</option><option value="y">Y 向上</option><option value="z">Z 向上</option></select></label></div><label class="stack-label">地面距模型最低点（m）<input id="floor-level" type="number" min="0" step="0.01" placeholder="自动识别地板顶面"></label><button id="reimport-button" class="small-button" disabled>应用设置并重新导入</button><p class="hint">USDZ 导入需要管理员启用转换服务；未启用时请使用 GLB 模型。3DM 请通过本站服务打开。</p></details>
+      </section>
+      <section class="control-section" id="office-society-panel" hidden><span class="eyebrow">OFFICE / SPATIAL SIMULATION</span><h2>一座持续生活的办公楼</h2><div id="society-summary"></div><div id="society-lifts"></div><p id="society-agenda" class="hint"></p><p class="hint">员工身份与工位固定；入座、交流、会议和跨层出行持续进行。点击人物查看身份与当前任务；选中人员后再点空椅子或沙发，可安排入座。</p></section>
+      <section class="control-section" id="model-replace-controls">
+        <div class="section-heading"><h2>家具模型替换</h2><span class="step">01B</span></div>
+        <p class="hint">点击场景中的家具后自动识别名称和类别；下面会显示本机模型库中的相似模型缩略图。点击任意模型卡片即可替换，可动 GLB 会自动保留动画和骨骼节点信息。</p>
+        <div id="replace-current" class="replace-current" aria-live="polite">等待点击场景中的家具…</div>
+        <div id="replace-asset-list" class="model-replace-list" role="list" aria-label="相似家具模型列表"><div class="model-replace-empty">点击三维场景中的家具后显示相似模型。</div></div>
+        <!-- Legacy controls remain hidden so existing state wiring stays compatible. -->
+        <select id="replace-kind" hidden><option value="">全部家具</option><option value="bed">床</option><option value="sofa">沙发</option><option value="table">桌子</option><option value="chair">椅子</option><option value="cabinet">柜体</option><option value="fridge">冰箱</option><option value="toilet">卫生间洁具</option></select>
+        <select id="replace-target" hidden><option value="">点击场景中的家具后自动识别</option></select>
+        <select id="replace-asset" hidden><option value="">正在读取本地模型库…</option></select>
+        <input id="replace-files" type="file" multiple hidden accept=".glb,.gltf,.bin,.png,.jpg,.jpeg,.webp">
+        <button id="replace-apply" hidden>替换选中</button><button id="replace-random" hidden>随机替换</button><button id="replace-restore" hidden>还原替换</button><button id="replace-joint-play" hidden>播放可动模型动画</button>
+        <input id="replace-auto-interact" type="checkbox" checked hidden>
+        <p class="hint" id="replace-status">可用模型由服务器模型库提供。未找到同类模型时会提示当前类别暂无匹配项。</p>
+      </section>
+      <section class="control-section mode-section" id="mode-controls">
+        <div class="section-heading"><h2>工作模式</h2><span class="step">02</span></div>
+        <select id="operation-mode" aria-label="仿真工作方式"><option value="resident">任务驱动数字住户 · 内置任务 / 可编辑住宅</option><option value="society">办公日常 · SPATIAL SIMULATION</option><option value="crowd" selected>自由探索 · 模型通行与人流</option></select>
+        <p class="hint">先选择模式，再在下面设置目的地。任务模式按目的地顺序执行；探索模式让人群在目的地之间持续随机行走。</p>
+      </section>
+      <section class="control-section" id="resident-controls">
+        <div class="section-heading"><h2>任务驱动数字住户</h2><span class="step">02</span></div>
+        <label class="stack-label">住户画像<select id="resident-profile"><option value="wheelchair">轮椅住户</option><option value="electricWheelchair">电动轮椅住户</option><option value="assisted">助行器老人</option><option value="blind">视障 / 白杖住户</option><option value="upper">上肢活动受限住户</option><option value="pedestrian">普通步行者</option><option value="diy">DIY · 自然语言画像</option></select></label>
+        <label class="stack-label">任务包<select id="resident-task-pack" aria-label="住户任务包"><option value="core">核心五项</option><option value="night">核心 + 夜间起夜</option><option value="stretcher">核心 + 急救担架</option><option value="clutter">核心 + 门口杂物容错</option><option value="all">核心 + 全部扩展任务</option></select></label>
+        <label class="stack-label resident-diy-field" id="resident-diy-field">自然语言人物描述<textarea id="resident-diy-prompt" rows="3" placeholder="例如：一位使用助行器的老人，身体宽 0.68 米，走路速度 0.5 米每秒，触达 0.6 米"></textarea></label>
+        <label class="stack-label resident-diy-field" id="resident-schedule-field">一天行程 / 目的地描述<textarea id="resident-schedule-prompt" rows="3" placeholder="例如：早上先去床边，然后去冰箱，最后到卫生间。按这个顺序完成。也可以直接说：床 → 冰箱 → 卫生间"></textarea></label>
+        <div class="resident-ai-actions"><button id="resident-ai-parse" class="small-button">智能识别人物与行程</button><button id="resident-diy-parse" class="small-button">仅本地解析</button></div>
+        <p class="hint resident-diy-field" id="resident-ai-status">AI 会根据当前室内模型的家具、门和现有目的地选择坐标；没有配置 API 时自动使用本地关键词解析。</p>
+        <p class="hint" id="resident-profile-note"></p>
+        <details class="resident-parameters"><summary>查看 / 调整画像参数</summary><div class="form-grid"><label>身体宽度 m<input id="resident-width" type="number" min="0.3" max="1.2" step="0.01"></label><label>包络长度 m<input id="resident-length" type="number" min="0.3" max="1.8" step="0.01"></label><label>速度 m/s<input id="resident-speed" type="number" min="0.2" max="1.8" step="0.05"></label><label>水平触达 m<input id="resident-reach" type="number" min="0.2" max="1.2" step="0.01"></label><label>最高触达 m<input id="resident-maxHeight" type="number" min="0.5" max="2" step="0.05"></label><label>操作阻力阈值<input id="resident-doorEffort" type="number" min="0.1" max="1" step="0.05"></label></div><p class="hint">这些是可调整的行为假设，不能代表所有同类住户。转向按身体长宽扫掠；操作阻力使用归一化参数。</p></details>
+        <div class="resident-task-list" id="resident-task-list"><p class="hint">当前目的地列表就是任务队列。修改上面的目的地后，人物会按顺序逐站完成。</p></div>
+        <button id="resident-run" class="play-button">按顺序执行任务</button><button id="resident-repair" class="small-button">修复 Agent · 搜索并复测</button><button id="resident-restore" class="small-button" disabled>还原修复前场景</button>
+        <p class="hint">人物完成一站后继续前往下一站，始终保持在场景中。DIY 参数会直接改变身体包络、速度、触达和门操作判断。</p>
+      </section>
+      <section class="control-section destinations mode-destinations" id="mode-destination-controls">
+        <div class="section-heading"><h2>目的地与任务顺序</h2><button id="restore-goals" class="text-button">恢复默认</button></div>
+        <select id="goal-policy" aria-label="目的地模式"><option value="default">使用默认目的地</option><option value="custom">只使用自定义目的地</option><option value="mixed">默认 + 自定义</option></select>
+        <div id="goal-list"></div>
+        <div class="goal-actions"><button id="add-goal" class="small-button">＋ 在地面点选</button><button id="goal-form-toggle" class="small-button">输入坐标</button></div>
+        <div id="goal-form" hidden><label class="stack-label">目的地名称<input id="goal-name" type="text" maxlength="40" placeholder="例如：会议室入口"></label><div class="form-grid"><label>X（m）<input id="goal-x" type="number" step="0.1" value="0"></label><label>Z（m）<input id="goal-z" type="number" step="0.1" value="0"></label></div><button id="save-goal" class="small-button">添加目的地</button></div>
+        <p class="hint" id="goal-note">任务模式按列表从上到下依次前往；自由探索模式会在这些目的地之间随机选择下一站。</p>
+      </section>
+
+      <section class="control-section" id="crowd-controls">
+        <div class="section-heading"><h2>行人行为</h2><span class="step">02</span></div>
+        <label class="range-label">行人数量 <output id="count-value">32 人</output><input id="agent-count" type="range" min="4" max="100" value="32" step="4"></label>
+          <label class="stack-label">人群构成<select id="population"><option value="mixed">详细混合人群 · 四类响应</option><option value="pedestrian">步行对照 · 半径 0.25 m</option><option value="wheelchair">手动轮椅使用者 · 半径 0.45 m</option><option value="assisted">助行器老人 · 半径 0.38 m</option><option value="upper">上肢活动受限者 · 半径 0.27 m</option></select></label>
+        <div class="profile-key"><span><i style="--c:#1ca7a0"></i>步行</span><span><i style="--c:#607ce0"></i>轮椅</span><span><i style="--c:#d39c53"></i>辅助器</span></div>
+        <label class="range-label">期望速度 <output id="speed-value">1.0 ×</output><input id="walk-speed" type="range" min="0.4" max="1.6" step="0.1" value="1"></label>
+        <div class="form-grid"><label>视野角度<select id="vision"><option value="120">120°</option><option value="180" selected>180°</option><option value="270">270°</option></select></label><label>搜索范围<select id="search-range"><option value="4">4 m</option><option value="8" selected>8 m</option><option value="16">16 m</option><option value="999">整个场景</option></select></label></div>
+      </section>
+      <section class="control-section" id="injury-rescue-controls">
+        <div class="section-heading"><h2>随机受伤救援</h2><span class="step">03</span></div>
+        <label class="stack-label"><input type="checkbox" id="injury-rescue-enabled"> 一名行人随机摔倒，启动双医生担架救援</label>
+        <div class="form-grid"><button id="injury-rescue-start" class="small-button">启动救援实验</button><button id="injury-rescue-reset" class="small-button">清除救援</button></div>
+        <p class="hint" id="injury-rescue-status">启用后，办公楼或住宅楼都会在行走 5–9 秒后随机触发脚踝扭伤；两名医生从入口进入，担架按人体和家具净空行走并返回入口。</p>
+      </section>
+      <section class="control-section">
+        <div class="section-heading"><h2>分析与渲染</h2><span class="step">03</span></div>
+        <label class="stack-label">地面栅格<select id="cell-size"><option value="0.15">0.15 m · 精细</option><option value="0.2" selected>0.20 m · 住宅推荐</option><option value="0.25">0.25 m · 标准</option><option value="0.4">0.40 m · 快速</option></select></label>
+        <label class="stack-label">渲染风格<select id="render-style"><option value="access" selected>ACCESS · 白蓝空间</option><option value="editorial">Editorial · 深色电影室内</option><option value="moodboard">Moodboard · 暖木电影光</option><option value="soft-home">Soft Home · 灰白薄荷</option><option value="surreal">Surreal · 柔光彩色空间</option><option value="daylight">日光街景 · 冷影暖阳</option><option value="archviz">写实材质 · 木纹与暖光</option><option value="mirror-edge">镜面光影 · RGB</option></select></label>
+        <label class="stack-label">画面品质<select id="render-quality"><option value="high" selected>精细 · 环境遮蔽 / 柔和阴影</option><option value="balanced">流畅 · 材质 / 阴影</option></select></label>
+        <div class="launch-note" id="launch-note"></div>
+        <p class="hint" id="grid-note">按人体活动高度提取障碍物；窄缝采用保守判定。</p>
+      </section>
+      <section class="control-section" id="disaster-controls" hidden inert>
+        <div class="section-heading"><h2>灾害实验</h2><span class="step">04</span></div>
+        <label class="stack-label">场景<select id="disaster-type"><option value="none">无灾害 · 日常办公</option><option value="infection">呼吸道传染病 · 喷嚏 / 潜伏 / 日常传播</option><option value="ventilation">通风污染 · 出风口 / 空气扩散</option><option value="zombie-air">通风感染 · 潜伏 / 房间隔离</option><option value="zombie">丧尸感染 · 追捕 / 逃生</option><option value="fire">随机火源 · 蔓延 / 烟气 / 疏散</option><option value="earthquake">突发地震 · 摇晃 / 倒塌 / 掉落</option></select></label>
+        <label class="range-label">灾害强度 <output id="disaster-intensity-value">1.0 ×</output><input id="disaster-intensity" type="range" min="0.4" max="1.8" step="0.1" value="1"></label><label class="stack-label"><input type="checkbox" id="agent-bubbles" checked> 显示人物状态气泡</label>
+        <label class="range-label" id="virus-lifetime-control" hidden>病毒空气存活 <output id="virus-lifetime-value">30 秒</output><input id="virus-lifetime" type="range" min="5" max="120" step="5" value="30"></label>
+        <div class="form-grid"><button id="disaster-start" class="small-button">启动实验</button><button id="disaster-reset" class="small-button">清除灾害</button></div>
+        <p class="hint" id="disaster-status">人物会发现危险、呼喊同伴、离座并通过楼梯疏散至首层出口。</p>
+        <div id="air-experiment-metrics" class="air-experiment-metrics" hidden>
+          <div class="air-progress-title"><strong id="air-floor-title">本层传播</strong><span id="air-floor-ratio"></span></div>
+          <progress id="air-floor-progress" max="1" value="0" aria-label="本层传播进度"></progress>
+          <div class="air-metrics"><span>实验计时<strong id="air-elapsed">00:00</strong></span><span>本层完成耗时<strong id="air-completed-at">传播中</strong></span></div>
+          <p class="hint" id="air-detail"></p>
+          <details><summary id="air-floors-summary">各层传播进度</summary><div id="air-floor-list" class="air-floor-list"></div></details>
+          <p class="hint air-model-note">加速演示模型 · 时间用于比较本次实验</p>
+        </div>
+
+      </section>
+      <div class="control-foot"><span class="status-dot"></span>本地计算 · 模型不会上传到服务器</div>
+    </aside>
+    <section class="stage-column">
+      <div class="stage-toolbar"><div class="view-tabs" role="group" aria-label="相机视角"><button class="active" data-view="perspective">空间透视</button><button data-view="detail">细节近景</button><button data-view="top">平面总览</button><button data-view="human">跟随人物</button><button data-view="walk">第一人称</button></div><div class="scene-tools"><button id="fit-button" class="icon-button" title="适配视图" aria-label="适配视图">⛶</button><button id="snapshot-button" class="icon-button" title="保存视图 PNG" aria-label="保存视图 PNG">▣</button></div></div>
+      <div class="stage" id="stage">
+        <div id="viewport" aria-label="室内通行三维场景"></div>
+        <div class="stage-caption"><span class="eyebrow">DIGITAL TWIN / <span id="scene-code">LEVEL 01</span></span><h2 id="scene-title">Digital Workplace</h2><p id="scene-subtitle">办公空间 / 单层通行仿真</p></div>
+        <div class="stage-badge"><span class="live-dot"></span><span id="run-status">准备就绪</span></div>
+        <div id="loading" class="loading" hidden><span class="spinner"></span><b id="loading-text">正在构建场景…</b><small>提取几何 / 栅格化 / 构建通行场</small></div>
+        <div id="toast" class="toast" role="status" hidden></div>
+        <div class="selection-card" id="selection" hidden><button data-close-selection aria-label="关闭行人信息">×</button><div class="selection-body"></div></div>
+        <div class="cell-inspector" id="cell-inspector" hidden aria-live="polite"><button class="inspector-close" data-close-cell aria-label="关闭磕碰详情">×</button><div class="cell-inspector-body"></div></div>
+        <div class="stage-bottom"><div class="layer-pills"><label><input type="checkbox" id="heat-visible" checked>人群热点</label><label><input type="checkbox" id="trails-visible">行走轨迹</label><label><input type="checkbox" id="obstacles-visible">通行边界</label><label><input type="checkbox" id="vision-visible">行人视野</label><label><input type="checkbox" id="walls-visible" checked>建筑墙体</label><label><input type="checkbox" id="zones-visible">空间分区</label></div><div class="stage-hints"><span id="tool-hint">左键旋转 / 右键平移 / 滚轮缩放 · 点选人物或人群热点</span><span class="north">N ↑</span></div></div>
+      </div>
+      <div class="playback-bar"><button id="play-button" class="play-button"><span id="play-icon">▶</span><span id="play-text">开始模拟</span></button><button id="reset-button" class="icon-button" title="清除灾害与热点，并重启当前机器人任务" aria-label="重置当前实验">↺</button><div class="playback-time"><b id="elapsed">00:00</b><small>SIMULATED TIME</small></div><div class="playback-divider"></div><span class="playback-label">时间倍率</span><div class="speed-tabs" aria-label="时间倍率"><button data-rate="1" class="active">1×</button><button data-rate="2">2×</button><button data-rate="4">4×</button></div><div class="frame-meter"><span class="live-dot"></span><span id="fps">— FPS</span></div></div>
+      <div class="method-note"><span>↗</span><p><b>观察通行，理解空间。</b> 这是单层平面上的探索性模拟；身体半径、模型单位和地面标高直接影响结果。碰撞以保守栅格近似，结果用于设计比较。</p></div>
+    </section>
+    <aside class="results-panel">
+      <div class="results-heading"><div><span class="eyebrow">SPATIAL SIMULATION / LIVE</span><h2>日常观察</h2></div><span class="record-tag"><span class="live-dot"></span>LIVE</span></div>
+      <section id="society-activity-panel" class="result-section" hidden><div class="section-heading"><h3>全楼活动</h3><span class="step">LIVE</span></div><p id="society-narrative" aria-live="polite"></p><div id="society-activity-metrics" class="society-metrics"></div><div class="section-heading"><h3>本层人员</h3><span class="step">点选跟随</span></div><div id="society-people-list"></div></section>
+      <section id="resident-results" class="result-section"><div class="section-heading"><h3>住户任务执行</h3><button id="resident-export" class="text-button">导出报告</button></div><div id="resident-live" class="resident-live"></div><div id="resident-standards"></div><div id="resident-comparison"></div><div class="goal-actions"><button class="small-button" id="resident-before" disabled>查看修改前</button><button class="small-button" id="resident-after" disabled>查看修改后</button></div><div id="resident-table"></div><div id="resident-changes"></div></section>
+      <div class="primary-metric"><span>已完成目的地到达</span><div><strong id="arrivals">0</strong><small>次</small><svg viewBox="0 0 105 38" aria-hidden="true"><path id="sparkline" d="M0,35 L105,35" fill="none" stroke="#279a91" stroke-width="2"/></svg></div><p>持续记录每位行人的目标旅程</p></div>
+      <div class="metric-grid"><div><span>障碍接触</span><b id="contacts">0</b><small>事件 · 1 秒去重</small></div><div><span>受阻旅程</span><b id="blocked">0</b><small>事件 · 每旅程一次</small></div><div><span>正在行走</span><b id="moving">0 <small>/ 32</small></b><small>其余行人等待或停留</small></div><div><span>已结束旅程到达率</span><b id="success-rate">—</b><small>到达 / (到达 + 受阻)</small></div></div>
+      <section id="crowd-heat-panel" class="result-section"><div class="section-heading"><h3>人群热点</h3><button id="clear-heat" class="text-button">清空热点</button></div><select id="heat-mode" aria-label="热力图指标"><option value="density">人群停留 · 累计人秒</option><option value="traffic">人流路径 · 累计行走距离</option><option value="visits">人群经过 · 访问次数</option></select><div class="heat-legend"></div><div class="legend-labels"><span>少</span><span id="heat-max">尚无人群记录</span><span>多</span></div><div class="analysis-pair"><span>人群覆盖面积<b id="sample-area">0.0 m²</b></span><span>本层人数<b id="risk-score">—</b></span></div><p class="hint">根据人物的真实位置、停留时间和行走路径累计。颜色表示人群聚集和经过的强弱。</p><p id="vision-status" class="hint" hidden></p><p id="crowd-cell-info" class="hint">点击热点查看该处的停留和经过。</p></section>
+      <section class="result-section event-section"><div class="section-heading"><h3>行为记录</h3><button id="clear-events" class="text-button">清空记录</button><span class="count-tag" id="event-count">0</span></div><div id="event-list"><div class="empty-state"><span>⌁</span><p>从一次行走开始。<br>办公活动和灾害预警会记录在这里。</p></div></div></section>
+      <button id="export-button" class="export-button">导出分析数据 <span>↓ CSV / JSON</span></button>
+    </aside>
+  </main>
+      <dialog id="help-dialog"><button id="close-help" class="dialog-close" aria-label="关闭">×</button><span class="eyebrow">SPATIAL SIMULATION</span><h2>观察办公日常，进入同一座楼。</h2><p>30 层办公空间共享固定的人群、楼梯和电梯。点选楼层进入，点选人物或在本层人员中选择跟随。</p><p>第一人称：鼠标控制镜头，WASD 移动，Shift 奔跑，空格跳跃，左键左拳、右键右拳。E 呼叫电梯，进入轿厢后选择停靠层并确认。Esc 释放鼠标。</p><p>灾害实验支持火灾、地震和丧尸。人物发现危险或听见警告后离座疏散；丧尸可咬击并传播感染。清除实验恢复日常模式。</p><p>人群热点统计真实停留、路程和经过次数；空间分区显示当前布局。F 可隐藏菜单。</p><p>物件有不同耐久和连接强度：玻璃易碎，木板、金属和墙体依次更耐打。可以推倒、拆散或局部击破，碎片由本地物理引擎模拟。</p></dialog>
+  <script src="js/collaboration/station-event-presets.js"></script>
+  <script src="js/collaboration/scene-commands.js"></script><script src="js/collaboration/observation-chat.js"></script>
+  <script src="js/vendor/three-r128/build/three.min.js"></script>
+  <script src="js/vendor/three-r128/controls/OrbitControls.js"></script>
+  <script src="js/vendor/postprocessing/Pass.js"></script><script src="js/vendor/postprocessing/CopyShader.js"></script><script src="js/vendor/postprocessing/ShaderPass.js"></script><script src="js/vendor/postprocessing/EffectComposer.js"></script><script src="js/vendor/postprocessing/SimplexNoise.js"></script><script src="js/vendor/postprocessing/SSAOShader.js"></script><script src="js/vendor/postprocessing/SSAOPass.js"></script><script src="js/vendor/postprocessing/GammaCorrectionShader.js"></script><script src="js/vendor/postprocessing/FXAAShader.js"></script>
+  <script src="js/vendor/three-r128/loaders/GLTFLoader.js"></script>
+      <script src="js/core.js"></script><script src="js/ui-text.js"></script><script src="js/themes.js"></script><script src="js/geometry.js"></script><script src="js/anatomical-hand.js"></script><script src="js/anatomy-ik.js"></script><script src="js/locomotion.js"></script><script src="js/native-leg-rig.js"></script><script src="js/white-avatar-style.js"></script><script src="js/avatars.js"></script><script src="js/render-styles.js"></script><script src="js/archviz-reflection.js"></script><script src="js/archviz-surfaces.js"></script><script src="js/rendering.js"></script><script src="js/scene.js"></script><script src="js/immersive-lighting.js"></script><script src="js/crowd-observation.js"></script><script src="js/office-overlays.js"></script><script src="js/furniture-library.js"></script><script src="js/furniture-assets.js"></script><script src="js/office-kit.js"></script><script src="js/matrix-genome.js"></script><script src="js/flexible-floor-plan.js"></script><script src="js/tower-floor.js"></script><script src="js/fire-core.js"></script><script src="js/earthquake-core.js"></script><script src="js/disaster.js"></script><script src="js/agent-states.js"></script><script src="js/crowd-activity.js"></script><script src="js/office-crowd-space.js"></script><script src="js/office-society.js"></script><script src="js/app.js"></script><script src="js/site-crowd.js"></script><script src="js/first-person.js"></script><script src="js/tower-journey.js"></script><script src="js/tower-world.js"></script><script src="js/continuous-tower.js"></script><script src="js/tower-airborne.js"></script><script src="js/zombie-society.js"></script><script src="js/civilian-reactions.js"></script><script src="js/air-particles.js"></script><script src="js/office-respiratory.js"></script><script src="js/office-respiratory-demo.js"></script><script src="js/office-ventilation.js"></script><script src="js/office-quake-physics.js"></script><script src="js/office-emergency.js"></script><script src="js/hand-rig.js"></script><script src="js/destruction-materials.js"></script><script src="js/boxing-motion.js"></script><script src="js/boxing-gloves.js"></script><script src="js/robot-hands.js"></script><script src="js/combat.js"></script><script src="js/fracture-cells.js"></script><script src="js/destruction-vfx.js"></script><script src="js/rigid-fragment-batch.js"></script><script src="js/wall-damage.js"></script><script src="js/rapier-destruction.js"></script><script src="js/character-motion.js"></script><script src="js/player-hand-assets.js"></script><script src="js/character-lod.js"></script><script src="js/character-mouth.js"></script><script src="js/character-gore.js"></script><script src="js/character-assets.js"></script><script src="js/parametric-envelope.js"></script><script src="js/matrix-evolution.js"></script><script src="js/building-focus.js"></script><script src="js/campus-landscape.js"></script><script src="js/building.js"></script>
+  <script src="js/collaboration/station-event-kit.js"></script>
+  <script src="js/collaboration/station-orbital-events.js"></script>
+  <script src="js/collaboration/station-cabin-incidents.js"></script>
+  <script src="js/collaboration/station-event-reactions.js"></script>
+  <script src="js/collaboration/station-event-pip.js"></script>
+  <script src="js/collaboration/scene-customization.js"></script>
+  <script src="js/collaboration/contract.js"></script><script src="js/collaboration/robots.js"></script><script src="js/collaboration/industrial-quadruped.js"></script><script src="js/collaboration/unitree-g1.js"></script><script src="js/collaboration/worlds.js"></script><script src="js/collaboration/simulation.js"></script><script src="js/collaboration/original-studio.js"></script><script src="js/collaboration/scene-markers.js"></script><script src="js/collaboration/robot-interaction.js"></script><script src="js/collaboration/station-interiors.js"></script><script src="js/collaboration/station-crew.js"></script><script src="js/collaboration/station-motion.js"></script><script src="js/collaboration/station-traffic.js"></script><script src="js/collaboration/station-orbital-robots.js"></script><script src="js/collaboration/station-reference-robots.js"></script><script src="js/collaboration/station-story-poses.js"></script><script src="js/collaboration/station-story-labels.js"></script><script src="js/collaboration/station-story-infection.js"></script><script src="js/collaboration/station-story-leak.js"></script><script src="js/collaboration/station-film-set.js"></script><script src="js/collaboration/station-film-mannequin.js"></script><script src="js/collaboration/station-film-acting.js"></script><script src="js/collaboration/station-film.js"></script><script src="js/collaboration/station-film-branches.js"></script><script src="js/collaboration/station-film-matrix.js"></script><script src="js/collaboration/station-short-robots.js"></script><script src="js/collaboration/station-short-stories.js"></script><script src="js/collaboration/station-short-cameras.js"></script><script src="js/collaboration/station-short-props.js"></script><script src="js/collaboration/station-short-film.js"></script><script src="js/collaboration/station-short-zombie.js"></script><script src="js/collaboration/station-short-branches.js"></script><script src="js/collaboration/station-short-matrix.js"></script><script src="js/collaboration/station-scenarios.js"></script><script src="js/collaboration/station-morphology.js"></script><script src="js/collaboration/station-shell-study.js"></script><script src="js/collaboration/station-shell-cabins.js"></script><script src="js/collaboration/station-world.js"></script><script src="js/collaboration/original-integration.js"></script>
+  <script src="js/robot-selection.js"></script>
+  <script src="js/robot-generation-plan.js"></script>
+  <script src="js/robot-army-protocol.js"></script>
+  <script src="js/robot-control-protocol.js"></script>
+  <script src="js/megastructure-protocol.js"></script>
+  <script src="js/disaster-commands.js"></script>
+  <script src="js/robot-perception.js"></script>
+  <script src="js/robot-observation.js"></script>
+  <script src="js/robot-contacts.js"></script>
+  <script src="js/security-visibility.js"></script>
+  <script src="js/robot-army.js"></script>
+  <script src="js/office-duty-fleet.js"></script>
+  <script src="js/stealth-sight.js"></script>
+  <script src="js/first-person-mode.js"></script>
+  <script src="js/robot-models.js"></script>
+  <script src="js/office-robots.js"></script>
+  <script src="js/robot-wrecks.js"></script>
+  <script src="js/robot-conflict.js"></script>
+  <script src="js/robot-cargo.js"></script>
+  <script src="js/robot-systems.js"></script>
+  <script src="js/collapse-vfx.js"></script>
+  <script src="js/disaster-physics.js"></script>
+  <script src="js/building-fire-effects.js"></script>
+  <script src="js/disaster-director.js"></script>
+  <script src="js/megastructure-motion.js"></script>
+  <script src="js/megastructure-flight.js"></script>
+  <script src="js/megastructure-fleet.js"></script>
+  <script src="js/robot-library.js"></script>
+  <script src="js/scenario-safety.js"></script>
+  <script src="js/scenario-runtime.js"></script>
+  <script src="js/collaboration/event-integration.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

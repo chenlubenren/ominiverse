@@ -1,0 +1,5 @@
+/* Fixed-length two-bone limbs. A stable pole prevents elbow inversion. */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.IndoorLab.AnatomyIK=factory();})(typeof window==='undefined'?globalThis:window,()=>{
+ function solve(a,target,pole,upper,lower,maxReach=.985){let dx=target.x-a.x,dy=target.y-a.y,dz=target.z-a.z,d=Math.hypot(dx,dy,dz);if(d<1e-6){dx=0;dy=-1;dz=0;}else{dx/=d;dy/=d;dz/=d;}d=Math.max(Math.max(Math.abs(upper-lower)+.001,(upper+lower)*.25),Math.min((upper+lower)*maxReach,d));let px=pole.x,py=pole.y,pz=pole.z,dot=px*dx+py*dy+pz*dz;px-=dot*dx;py-=dot*dy;pz-=dot*dz;let n=Math.hypot(px,py,pz);if(n<1e-6){px=dy;py=-dx;pz=0;n=Math.hypot(px,py);if(n<1e-6){px=1;py=0;pz=0;n=1;}}px/=n;py/=n;pz/=n;const along=(upper*upper-lower*lower+d*d)/(2*d),bend=Math.sqrt(Math.max(0,upper*upper-along*along));return{elbow:{x:a.x+dx*along+px*bend,y:a.y+dy*along+py*bend,z:a.z+dz*along+pz*bend},wrist:{x:a.x+dx*d,y:a.y+dy*d,z:a.z+dz*d},distance:d};}
+ return{solve};
+});
